@@ -39,7 +39,7 @@
                         <ul>
                             <li>在工作中，我碰到了分布式系统数据一致性的问题，开始的解决方案是写补偿方法，缺点明显，侵入业务严重，而且每个业务方法都要写类似的容错代码，于是网上找没有侵入的分布式事务解决方案。
                                 XA/JTA协议的框架侵入性小，但是性能低下，整个事务期间都会锁住数据，主流框架是ATOMIKOS和JOTM，不支持dubbo,然后又找了阿里的GTS，遗憾的是GTS收费且不开源，那就自己写一个</li>
-                            <li>meepo基于byteJta,meepo基于byteJta是一个典型的两阶段提交协议(原理：https://www.w3cschool.cn/architectroad/architectroad-two-phase-commit.html)，JTA规范的框架，选择byteJta的原因是支持dubbo</li>
+                            <li>meepo基于byteJta,byteJta是一个典型的两阶段提交协议(原理：https://www.w3cschool.cn/architectroad/architectroad-two-phase-commit.html)，JTA规范的框架，支持dubbo和springcloud，方便改写</li>
                         </ul>
 
 
