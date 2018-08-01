@@ -22,7 +22,7 @@
         <entry file="file://$PROJECT_DIR$/donate/index.html">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="330">
-              <caret line="22" column="32" lean-forward="true" selection-start-line="22" selection-start-column="32" selection-end-line="22" selection-end-column="32" />
+              <caret line="22" column="32" selection-start-line="22" selection-start-column="32" selection-end-line="22" selection-end-column="32" />
             </state>
           </provider>
         </entry>
@@ -30,8 +30,8 @@
       <file leaf-file-name="index.html" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/2018/08/01/meepo/one/index.html">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="215">
-              <caret line="45" column="68" selection-start-line="45" selection-start-column="58" selection-end-line="45" selection-end-column="68" />
+            <state relative-caret-position="234">
+              <caret line="45" column="89" selection-start-line="45" selection-start-column="89" selection-end-line="45" selection-end-column="89" />
             </state>
           </provider>
         </entry>
@@ -43,11 +43,13 @@
       <find>tcc源码</find>
       <find>hmily-tcc</find>
       <find>https://github.com/yu199195/hmily</find>
+      <find>yu199195</find>
     </findStrings>
     <replaceStrings>
       <replace>meepo源码</replace>
       <replace>meepo</replace>
       <replace>https://github.com/wxbty/meepo</replace>
+      <replace>wxbty</replace>
     </replaceStrings>
   </component>
   <component name="Git.Settings">
@@ -95,47 +97,23 @@
             <path>
               <item name="wxbty.github.io" type="b2602c69:ProjectViewProjectNode" />
               <item name="wxbty.github.io" type="462c0819:PsiDirectoryNode" />
-              <item name="2018" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="wxbty.github.io" type="b2602c69:ProjectViewProjectNode" />
-              <item name="wxbty.github.io" type="462c0819:PsiDirectoryNode" />
-              <item name="2018" type="462c0819:PsiDirectoryNode" />
-              <item name="08" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="wxbty.github.io" type="b2602c69:ProjectViewProjectNode" />
-              <item name="wxbty.github.io" type="462c0819:PsiDirectoryNode" />
-              <item name="2018" type="462c0819:PsiDirectoryNode" />
-              <item name="08" type="462c0819:PsiDirectoryNode" />
-              <item name="01" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="wxbty.github.io" type="b2602c69:ProjectViewProjectNode" />
-              <item name="wxbty.github.io" type="462c0819:PsiDirectoryNode" />
-              <item name="2018" type="462c0819:PsiDirectoryNode" />
-              <item name="08" type="462c0819:PsiDirectoryNode" />
-              <item name="01" type="462c0819:PsiDirectoryNode" />
-              <item name="meepo" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="wxbty.github.io" type="b2602c69:ProjectViewProjectNode" />
-              <item name="wxbty.github.io" type="462c0819:PsiDirectoryNode" />
-              <item name="2018" type="462c0819:PsiDirectoryNode" />
-              <item name="08" type="462c0819:PsiDirectoryNode" />
-              <item name="01" type="462c0819:PsiDirectoryNode" />
-              <item name="meepo" type="462c0819:PsiDirectoryNode" />
-              <item name="one" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="wxbty.github.io" type="b2602c69:ProjectViewProjectNode" />
-              <item name="wxbty.github.io" type="462c0819:PsiDirectoryNode" />
               <item name="categories" type="462c0819:PsiDirectoryNode" />
             </path>
             <path>
               <item name="wxbty.github.io" type="b2602c69:ProjectViewProjectNode" />
               <item name="wxbty.github.io" type="462c0819:PsiDirectoryNode" />
               <item name="donate" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="wxbty.github.io" type="b2602c69:ProjectViewProjectNode" />
+              <item name="wxbty.github.io" type="462c0819:PsiDirectoryNode" />
+              <item name="images" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="wxbty.github.io" type="b2602c69:ProjectViewProjectNode" />
+              <item name="wxbty.github.io" type="462c0819:PsiDirectoryNode" />
+              <item name="images" type="462c0819:PsiDirectoryNode" />
+              <item name="meepo" type="462c0819:PsiDirectoryNode" />
             </path>
           </expand>
           <select />
@@ -214,12 +192,12 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1533104846837</updated>
-      <workItem from="1533104848430" duration="1557000" />
+      <workItem from="1533104848430" duration="2124000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="1557000" />
+    <option name="totallyTimeSpent" value="2124000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="79" y="71" width="1360" height="776" extended-state="0" />
@@ -235,10 +213,10 @@
       <window_info anchor="bottom" id="Database Changes" show_stripe_button="false" />
       <window_info anchor="bottom" id="Run" order="2" />
       <window_info anchor="bottom" id="Version Control" />
-      <window_info anchor="bottom" id="Terminal" visible="true" weight="0.3292683" />
+      <window_info active="true" anchor="bottom" id="Terminal" visible="true" weight="0.3292683" />
       <window_info id="Capture Tool" />
       <window_info id="Designer" />
-      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.24962063" />
+      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.24962063" />
       <window_info anchor="right" id="Database" />
       <window_info anchor="bottom" id="Find" order="1" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
@@ -274,14 +252,14 @@
     <entry file="file://$PROJECT_DIR$/donate/index.html">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="330">
-          <caret line="22" column="32" lean-forward="true" selection-start-line="22" selection-start-column="32" selection-end-line="22" selection-end-column="32" />
+          <caret line="22" column="32" selection-start-line="22" selection-start-column="32" selection-end-line="22" selection-end-column="32" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/2018/08/01/meepo/one/index.html">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="215">
-          <caret line="45" column="68" selection-start-line="45" selection-start-column="58" selection-end-line="45" selection-end-column="68" />
+        <state relative-caret-position="234">
+          <caret line="45" column="89" selection-start-line="45" selection-start-column="89" selection-end-line="45" selection-end-column="89" />
         </state>
       </provider>
     </entry>
