@@ -2,21 +2,7 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="e3af3b7e-5210-43a7-b906-aad60faab4ad" name="Default" comment="">
-      <change beforePath="$PROJECT_DIR$/2017/10/11/TCC/tcc-one/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/2018/08/01/meepo/one/index.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/2017/10/11/TCC/tcc-two/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/2018/08/01/meepo/two/index.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/2017/10/12/TCC/tcc-five/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/2018/08/12/TCC/tcc-five/index.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/2017/10/12/TCC/tcc-four/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/2018/08/12/TCC/tcc-four/index.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/2017/10/12/TCC/tcc-three/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/2018/08/12/TCC/tcc-three/index.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/2017/10/13/tcc/tcc-seven/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/2018/08/13/tcc/tcc-seven/index.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/2017/10/14/tx/tx-one/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/2018/08/14/tx/tx-one/index.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/2017/10/14/tx/tx-seven/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/2018/08/14/tx/tx-seven/index.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/2017/10/14/tx/tx-two/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/2018/08/14/tx/tx-two/index.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/archives/2017/10/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/archives/2017/10/index.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/archives/2017/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/archives/2017/index.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/archives/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/archives/index.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/categories/Raincat/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/categories/Raincat/index.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/categories/hmily-tcc/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/categories/hmily-tcc/index.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/hello-word/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/hello-word/index.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/2018/08/01/meepo/one/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/2018/08/01/meepo/one/index.html" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="TRACKING_ENABLED" value="true" />
@@ -44,13 +30,25 @@
       <file leaf-file-name="index.html" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/2018/08/01/meepo/one/index.html">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="218">
-              <caret line="32" column="62" selection-start-line="32" selection-start-column="57" selection-end-line="32" selection-end-column="62" />
+            <state relative-caret-position="215">
+              <caret line="45" column="68" selection-start-line="45" selection-start-column="58" selection-end-line="45" selection-end-column="68" />
             </state>
           </provider>
         </entry>
       </file>
     </leaf>
+  </component>
+  <component name="FindInProjectRecents">
+    <findStrings>
+      <find>tcc源码</find>
+      <find>hmily-tcc</find>
+      <find>https://github.com/yu199195/hmily</find>
+    </findStrings>
+    <replaceStrings>
+      <replace>meepo源码</replace>
+      <replace>meepo</replace>
+      <replace>https://github.com/wxbty/meepo</replace>
+    </replaceStrings>
   </component>
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
@@ -128,6 +126,11 @@
               <item name="01" type="462c0819:PsiDirectoryNode" />
               <item name="meepo" type="462c0819:PsiDirectoryNode" />
               <item name="one" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="wxbty.github.io" type="b2602c69:ProjectViewProjectNode" />
+              <item name="wxbty.github.io" type="462c0819:PsiDirectoryNode" />
+              <item name="categories" type="462c0819:PsiDirectoryNode" />
             </path>
             <path>
               <item name="wxbty.github.io" type="b2602c69:ProjectViewProjectNode" />
@@ -211,12 +214,12 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1533104846837</updated>
-      <workItem from="1533104848430" duration="979000" />
+      <workItem from="1533104848430" duration="1557000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="979000" />
+    <option name="totallyTimeSpent" value="1557000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="79" y="71" width="1360" height="776" extended-state="0" />
@@ -232,18 +235,18 @@
       <window_info anchor="bottom" id="Database Changes" show_stripe_button="false" />
       <window_info anchor="bottom" id="Run" order="2" />
       <window_info anchor="bottom" id="Version Control" />
-      <window_info anchor="bottom" id="Terminal" />
+      <window_info anchor="bottom" id="Terminal" visible="true" weight="0.3292683" />
       <window_info id="Capture Tool" />
       <window_info id="Designer" />
       <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.24962063" />
       <window_info anchor="right" id="Database" />
+      <window_info anchor="bottom" id="Find" order="1" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
       <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
       <window_info id="UI Designer" />
       <window_info anchor="right" id="Theme Preview" />
       <window_info anchor="bottom" id="Debug" order="3" weight="0.4" />
       <window_info id="Favorites" side_tool="true" />
-      <window_info anchor="bottom" id="Find" order="1" />
       <window_info anchor="right" id="Commander" internal_type="SLIDING" order="0" type="SLIDING" weight="0.4" />
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
       <window_info anchor="right" content_ui="combo" id="Hierarchy" order="2" weight="0.25" />
@@ -277,8 +280,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/2018/08/01/meepo/one/index.html">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="218">
-          <caret line="32" column="62" selection-start-line="32" selection-start-column="57" selection-end-line="32" selection-end-column="62" />
+        <state relative-caret-position="215">
+          <caret line="45" column="68" selection-start-line="45" selection-start-column="58" selection-end-line="45" selection-end-column="68" />
         </state>
       </provider>
     </entry>
