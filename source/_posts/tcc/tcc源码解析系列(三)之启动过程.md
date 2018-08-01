@@ -1,7 +1,7 @@
 ---
-title: tcc源码解析系列(三)之启动详解
+title: meepo源码解析系列(三)之启动详解
 date: 2017-10-12 17:03:53
-categories: hmily-tcc
+categories: meepo
 permalink: TCC/tcc-three
 ---
 
@@ -119,7 +119,7 @@ public void initialization(TccConfig tccConfig) {
   }
 ```
 *  **coordinatorRepository.init(appName, tccConfig)** 就是根据spi思想来具体初始化，现在支持的如图：
-  ![](https://yu199195.github.io/images/hmily-tcc/06.png)
+  ![](https://yu199195.github.io/images/meepo/06.png)
 
 *   **initCoordinatorPool()** 初始化 协调资源线程池
 ```java
