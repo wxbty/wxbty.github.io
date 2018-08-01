@@ -25,15 +25,15 @@ maven clean install
 
 * 进入meepo-demo-dubbo-account项目，修改application.yml中的数据库配置，如下图：
 
-  ![](https://yu199195.github.io/images/meepo/02.png)
+  ![](https://wxbty.github.io/images/meepo/02.png)
 
 * 修改applicationContext.xml中的配置，具体可以参考 [配置详解](https://github.com/wxbty/meepo/wiki/Configuration)
 
-  ![](https://yu199195.github.io/images/meepo/03.png)
+  ![](https://wxbty.github.io/images/meepo/03.png)
 
 * 修改spring-dubbo.xml 中的zookeeper配置,如图所示:
 
-  ![](https://yu199195.github.io/images/meepo/04.png)
+  ![](https://wxbty.github.io/images/meepo/04.png)
 
 *  inventory,order项目的配置修改和上面的一样，注意dubbo的端口不要重复。
 
@@ -46,11 +46,11 @@ maven clean install
 
 * 修改各项目中的application.yml的数据库配置。
 
- ![](https://yu199195.github.io/images/meepo/05.png)
+ ![](https://wxbty.github.io/images/meepo/05.png)
 
 * 修改各项目中applicationContext.xml的配置，具体可以参考 [配置详解](https://github.com/wxbty/meepo/wiki/Configuration)
 
-    ![](https://yu199195.github.io/images/meepo/03.png)
+    ![](https://wxbty.github.io/images/meepo/03.png)
 
 * 执行meepo-demo-springcloud-eureka项目中的EurekaServerApplication类的main方法
 

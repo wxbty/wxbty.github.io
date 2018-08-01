@@ -13,7 +13,7 @@ keywords: Java,架构,后端,服务端,分布式事务
 
 # URL
 ## If your site is put in a subdirectory, set url as 'http://yoursite.com/child' and root as '/child/'
-url: http://yu199195.github.io
+url: http://wxbty.github.io
 root: /
 permalink: :year/:month/:day/:title/
 permalink_defaults:
@@ -79,4 +79,4 @@ theme: maupassant
 ## Docs: https://hexo.io/docs/deployment.html
 deploy:
   type: git
-  repo: https://github.com/yu199195/yu199195.github.io.git
+  repo: https://github.com/wxbty/wxbty.github.io.git

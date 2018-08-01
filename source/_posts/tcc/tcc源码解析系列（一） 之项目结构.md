@@ -12,7 +12,7 @@ permalink: TCC/tcc-one
   * 序列化方式，支持java，hessian，kryo，protostuff。
 
 ###  项目结构
-![结构图](https://yu199195.github.io/images/meepo/012.png)
+![结构图](https://wxbty.github.io/images/meepo/012.png)
 
 *  **hmily-annotation** 提供分布式事务的@Tcc注解,对于向dubbo这种面向接口的rpc框架，为了保证接口的轻量性，所以抽离出来，单独做为一个项目。
 
@@ -24,11 +24,11 @@ permalink: TCC/tcc-one
 
 * **meepo-springcloud** 该项目是对springcloud框架的支持，里面主要针对springcloud的特性的实现。
 
-* **meepo-demo** 这是实战体验的demo项目，里面有针对dubbo用户和springcloud用户的案列，里面具体的配置，用户可以参考 [dubbo用户](https://github.com/yu199195/meepo/wiki/%E5%BF%AB%E9%80%9F%E4%BD%93%E9%AA%8C%EF%BC%88dubbo%EF%BC%89)  ,    [springcloud用户](https://github.com/yu199195/meepo/wiki/%E5%BF%AB%E9%80%9F%E4%BD%93%E9%AA%8C%EF%BC%88springcloud%EF%BC%89)。
+* **meepo-demo** 这是实战体验的demo项目，里面有针对dubbo用户和springcloud用户的案列，里面具体的配置，用户可以参考 [dubbo用户](https://github.com/wxbty/meepo/wiki/%E5%BF%AB%E9%80%9F%E4%BD%93%E9%AA%8C%EF%BC%88dubbo%EF%BC%89)  ,    [springcloud用户](https://github.com/wxbty/meepo/wiki/%E5%BF%AB%E9%80%9F%E4%BD%93%E9%AA%8C%EF%BC%88springcloud%EF%BC%89)。
 
 * **meepo-dashboard** 该项目是分布式事务管理后台的前端源码，采用vue.js + element UI 实现
 
 * **meepo-admin** 该项目是分布式事务的跟踪管理后台（调用链跟踪，控制补偿事务等功能）
-![登录界面](https://yu199195.github.io/images/meepo/tccLogin.png)
+![登录界面](https://wxbty.github.io/images/meepo/tccLogin.png)
 
-![事务补偿](https://yu199195.github.io/images/meepo/tccCompensation.png)
+![事务补偿](https://wxbty.github.io/images/meepo/tccCompensation.png)

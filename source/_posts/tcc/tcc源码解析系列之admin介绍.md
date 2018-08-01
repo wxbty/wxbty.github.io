@@ -104,9 +104,9 @@ compensation.zookeeper.sessionTimeOut=200000
 ### 步揍四:在浏览器访问  http://ip:prot/tcc-admin/index.html  ,输入用户名，密码登录。
 
 
-![登录界面](https://yu199195.github.io/images/meepo/tccLogin.png)
+![登录界面](https://wxbty.github.io/images/meepo/tccLogin.png)
 
-![事务补偿](https://yu199195.github.io/images/meepo/tccCompensation.png)
+![事务补偿](https://wxbty.github.io/images/meepo/tccCompensation.png)
 
 
 

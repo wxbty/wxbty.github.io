@@ -119,7 +119,7 @@ public void initialization(TccConfig tccConfig) {
   }
 ```
 *  **coordinatorRepository.init(appName, tccConfig)** 就是根据spi思想来具体初始化，现在支持的如图：
-  ![](https://yu199195.github.io/images/meepo/06.png)
+  ![](https://wxbty.github.io/images/meepo/06.png)
 
 *   **initCoordinatorPool()** 初始化 协调资源线程池
 ```java
