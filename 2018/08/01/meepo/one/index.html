@@ -54,6 +54,7 @@
                             <li>支持dubbo框架进行分布式事务（后续会添加springcloud）。</li>
                             <li>可以保证分布式系统中的分布式事务的 ACID 特性。 支持 Oracle、MySQL、Postgresql 等关系型数据库</li>
                             <li>meepo是阿里GTS的一个开源实现，按GTS的流程实现各功能模块，同时限制条件也类似，比如事务里的表必须有主键，保证所有框架事务管理范围内的数据，都不会被框架管理范围外的系统所修改，GTS：https://help.aliyun.com/document_detail/56746.html?spm=a2c4g.11186623.6.589.cdEaX4</li>
+                            <li>meepo的全局锁表中存储了记录的加锁信息。封锁的粒度是行（记录），锁的类型包括共享锁和互斥锁，对于同一个记录，加锁的规则是共享锁与共享锁不冲突，共享锁与互斥锁冲突、互斥锁与互斥锁冲突。对插入(INSERT)、修改(UPDATE)、删除(DELETE)、更新模式的锁定查询(SELECT… FOR UPDATE) 操作加互斥锁。对于共享模式的锁定查询 (SELECT…LOCK IN SHARE MODE) 操作加共享锁。若没有锁冲突，在锁表中，增加一行记录，表示加锁成功。</li>
                         </ul>
                         <h3 id="项目结构"><a href="#项目结构" class="headerlink" title="项目结构"></a>项目结构</h3>
                         <p><img src="https://wxbty.github.io/images/meepo/012.png" alt="结构图"></p>
@@ -80,43 +81,43 @@
                           class="search-form"><input type="text" name="q" maxlength="20" placeholder="Search"/><input
                             type="hidden" name="sitesearch" value="http://wxbty.github.io"/></form>
                 </div>
-                <div class="widget">
-                    <div class="widget-title"><i class="fa fa-folder-o"> 分类</i></div>
-                    <ul class="category-list">
-                        <li class="category-list-item"><a class="category-list-link"
-                                                          href="/categories/Raincat/">Raincat</a><span
-                                class="category-list-count">3</span></li>
-                        <li class="category-list-item"><a class="category-list-link" href="/categories/meepo/">meepo</a><span
-                                class="category-list-count">6</span></li>
-                    </ul>
-                </div>
-                <div class="widget">
-                    <div class="widget-title"><i class="fa fa-star-o"> 标签</i></div>
-                    <div class="tagcloud"></div>
-                </div>
-                <div class="widget">
-                    <div class="widget-title"><i class="fa fa-file-o"> 最近文章</i></div>
-                    <ul class="post-list">
-                        <li class="post-list-item"><a class="post-list-link" href="/2018/08/14/tx/tx-two/">二阶段提交分布式事务框架源码解析系列(二)之环境搭建</a>
-                        </li>
-                        <li class="post-list-item"><a class="post-list-link" href="/2018/08/14/tx/tx-seven/">二阶段提交分布式事务框架源码解析系列之transaction-admin
-                            事务跟踪查看管理后台</a></li>
-                        <li class="post-list-item"><a class="post-list-link" href="/2018/08/14/tx/tx-one/">二阶段提交分布式事务框架源码解析系列(一)之项目结构</a>
-                        </li>
-                        <li class="post-list-item"><a class="post-list-link" href="/2018/08/13/tcc/tcc-seven/">meepo源码解析系列之tcc-admin事务管理后台</a>
-                        </li>
-                        <li class="post-list-item"><a class="post-list-link" href="/2018/08/12/TCC/tcc-five/">meepo源码解析系列(五)之项目实战</a>
-                        </li>
-                        <li class="post-list-item"><a class="post-list-link" href="/2018/08/12/TCC/tcc-four/">meepo源码解析系列(四)之项目实战</a>
-                        </li>
-                        <li class="post-list-item"><a class="post-list-link" href="/2018/08/12/TCC/tcc-three/">meepo源码解析系列(三)之启动详解</a>
-                        </li>
-                        <li class="post-list-item"><a class="post-list-link" href="/2018/08/01/meepo/two/">meepo源码解析系列(二)之环境搭建</a>
-                        </li>
-                        <li class="post-list-item"><a class="post-list-link" href="/2018/08/01/meepo/one/">meepo源码解析系列(一)之项目结构</a>
-                        </li>
-                    </ul>
-                </div>
+                <!--<div class="widget">-->
+                    <!--<div class="widget-title"><i class="fa fa-folder-o"> 分类</i></div>-->
+                    <!--<ul class="category-list">-->
+                        <!--<li class="category-list-item"><a class="category-list-link"-->
+                                                          <!--href="/categories/Raincat/">Raincat</a><span-->
+                                <!--class="category-list-count">3</span></li>-->
+                        <!--<li class="category-list-item"><a class="category-list-link" href="/categories/meepo/">meepo</a><span-->
+                                <!--class="category-list-count">6</span></li>-->
+                    <!--</ul>-->
+                <!--</div>-->
+                <!--<div class="widget">-->
+                    <!--<div class="widget-title"><i class="fa fa-star-o"> 标签</i></div>-->
+                    <!--<div class="tagcloud"></div>-->
+                <!--</div>-->
+                <!--<div class="widget">-->
+                    <!--<div class="widget-title"><i class="fa fa-file-o"> 最近文章</i></div>-->
+                    <!--<ul class="post-list">-->
+                        <!--<li class="post-list-item"><a class="post-list-link" href="/2018/08/14/tx/tx-two/">二阶段提交分布式事务框架源码解析系列(二)之环境搭建</a>-->
+                        <!--</li>-->
+                        <!--<li class="post-list-item"><a class="post-list-link" href="/2018/08/14/tx/tx-seven/">二阶段提交分布式事务框架源码解析系列之transaction-admin-->
+                            <!--事务跟踪查看管理后台</a></li>-->
+                        <!--<li class="post-list-item"><a class="post-list-link" href="/2018/08/14/tx/tx-one/">二阶段提交分布式事务框架源码解析系列(一)之项目结构</a>-->
+                        <!--</li>-->
+                        <!--<li class="post-list-item"><a class="post-list-link" href="/2018/08/13/tcc/tcc-seven/">meepo源码解析系列之tcc-admin事务管理后台</a>-->
+                        <!--</li>-->
+                        <!--<li class="post-list-item"><a class="post-list-link" href="/2018/08/12/TCC/tcc-five/">meepo源码解析系列(五)之项目实战</a>-->
+                        <!--</li>-->
+                        <!--<li class="post-list-item"><a class="post-list-link" href="/2018/08/12/TCC/tcc-four/">meepo源码解析系列(四)之项目实战</a>-->
+                        <!--</li>-->
+                        <!--<li class="post-list-item"><a class="post-list-link" href="/2018/08/12/TCC/tcc-three/">meepo源码解析系列(三)之启动详解</a>-->
+                        <!--</li>-->
+                        <!--<li class="post-list-item"><a class="post-list-link" href="/2018/08/01/meepo/two/">meepo源码解析系列(二)之环境搭建</a>-->
+                        <!--</li>-->
+                        <!--<li class="post-list-item"><a class="post-list-link" href="/2018/08/01/meepo/one/">meepo源码解析系列(一)之项目结构</a>-->
+                        <!--</li>-->
+                    <!--</ul>-->
+                <!--</div>-->
                 <div class="widget">
                     <div class="widget-title"><i class="fa fa-external-link"> 友情链接</i></div>
                     <ul></ul>
