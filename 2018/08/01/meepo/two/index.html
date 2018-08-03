@@ -66,46 +66,41 @@
                             <li><p>进入meepo-test项目，修改resource文件夹下的xml文件的数据库配置，如下图：</p>
                                 <p><img src="https://wxbty.github.io/images/meepo/02.png" alt=""></p>
                             </li>
-                            <li><p>修改applicationContext.xml中的配置，具体可以参考 <a
-                                    href="https://github.com/wxbty/meepo/wiki/Configuration" target="_blank"
-                                    rel="external">配置详解</a></p>
-                                <p><img src="https://wxbty.github.io/images/meepo/03.png" alt=""></p>
-                            </li>
-                            <li><p>修改spring-dubbo.xml 中的zookeeper配置,如图所示:</p>
+                            <li><p>修改dubbo-order-service.xml、dubbo-stock-service.xml 中的dubbo配置,如图所示:</p>
                                 <p><img src="https://wxbty.github.io/images/meepo/04.png" alt=""></p>
                             </li>
-                            <li><p>inventory,order项目的配置修改和上面的一样，注意dubbo的端口不要重复。</p>
+                            <li><p>依次执行OrderServiceImpl，StockServiceImpl的main方法</p>
                             </li>
-                            <li><p>依次执行AccountApplication，InventoryApplication,OrderApplication中的main方法</p>
+                            <li><p>启动订单和库存服务后，可在命令行执行 telnet localhost 20880/20881
+                                然后 ls 查看两个dubbo服务是否正常暴露 </p>
                             </li>
-                            <li><p>访问<a href="http://localhost:8083/swagger-ui.html" target="_blank" rel="external">http://localhost:8083/swagger-ui.html</a>
-                                进入体验体验dubbo的分布式事务。</p>
+                            <li>执行test下面的TransactionTest体验dubbo的分布式事务。</p>
                             </li>
                         </ul>
-                        <h3 id="springcloud用户"><a href="#springcloud用户" class="headerlink" title="springcloud用户"></a>springcloud用户
+                        <h3 id="test说明"><a href="#test说明" class="headerlink" title="test说明"></a>test说明
                         </h3>
                         <ul>
-                            <li><p>修改各项目中的application.yml的数据库配置。</p>
-                                <p><img src="https://wxbty.github.io/images/meepo/05.png" alt=""></p>
-                            </li>
-                            <li><p>修改各项目中applicationContext.xml的配置，具体可以参考 <a
-                                    href="https://github.com/wxbty/meepo/wiki/Configuration" target="_blank"
-                                    rel="external">配置详解</a></p>
+                            <li><p>在每个测试用例里，都包含了概率抛特定异常及概率超时的场景，如下</p>
                                 <p><img src="https://wxbty.github.io/images/meepo/03.png" alt=""></p>
+                                <p><img src="https://wxbty.github.io/images/meepo/05.png" alt=""></p>
+                                <p>概率抛特定异常</p>
+                                <p><img src="https://wxbty.github.io/images/meepo/06.png" alt=""></p>
                             </li>
-                            <li><p>执行meepo-demo-springcloud-eureka项目中的EurekaServerApplication类的main方法</p>
+                            <li><p>testInsertAndUpdate测试用例执行插入一个订单，同时减少库存的操作</p>
+                                <p>calcService.bussiness(orderService, stockService, userId);表示一次插入订单及减少库存的操作，开启若干线程，每个线程循环若干次操作，结束后计算前后的库存+订单量是否相等</p>
                             </li>
-                            <li><p>依次执行AccountApplication，InventoryApplication,OrderApplication中的main方法</p>
+                            <li><p>testInsert测试单事务/本地事务</p>
+                                <p>以全局变量代替库存减少，结束后计算前后的库存+订单量是否相等</p>
                             </li>
-                            <li><p>访问<a href="http://localhost:8884/swagger-ui.html" target="_blank" rel="external">http://localhost:8884/swagger-ui.html</a>
-                                进入体验Springcloud分布式事务。</p>
+                            <li><p>testDeleteAndUpdate测试删除一个订单，同时增加库存的操作</p>
+                                <p>3个用例可以覆盖增删改及多服务/单服务的测试场景</p>
+                            </li>
+                            <li><p>mybatis测试：把  int ret = jdbcTemplate.update  改成dao再重新跑几个测试用例即可</p>
+                            <li><p>cglib测试：spring默认jdk动态代理，在spring配置文件中加入<aop:aspectj-autoproxy proxy-target-class="true"/>，重新跑测试用例</p>
                             </li>
                         </ul>
-                        <h3 id="如有任何问题欢迎加入QQ群：162614487-进行讨论"><a href="#如有任何问题欢迎加入QQ群：162614487-进行讨论" class="headerlink"
-                                                                 title="如有任何问题欢迎加入QQ群：162614487 进行讨论"></a>如有任何问题欢迎加入QQ群：162614487
-                            进行讨论</h3></div>
                     <div class="tags"></div>
-                    <div class="post-nav"><a href="/2018/08/12/TCC/tcc-three/" class="pre">meepo源码解析系列(三)之启动详解</a><a
+                    <div class="post-nav"><a href="#" class="pre">meepo源码解析系列(三)之启动详解</a><a
                             href="/2018/08/01/meepo/one/" class="next">meepo源码解析系列(一)之项目结构</a></div>
                 </div>
             </div>
@@ -118,40 +113,30 @@
                             type="hidden" name="sitesearch" value="http://wxbty.github.io"/></form>
                 </div>
                 <div class="widget">
-                    <div class="widget-title"><i class="fa fa-folder-o"> 分类</i></div>
-                    <ul class="category-list">
-                        <li class="category-list-item"><a class="category-list-link"
-                                                          href="/categories/Raincat/">Raincat</a><span
-                                class="category-list-count">3</span></li>
-                        <li class="category-list-item"><a class="category-list-link" href="/categories/meepo/">meepo</a><span
-                                class="category-list-count">6</span></li>
-                    </ul>
-                </div>
-                <div class="widget">
                     <div class="widget-title"><i class="fa fa-star-o"> 标签</i></div>
                     <div class="tagcloud"></div>
                 </div>
                 <div class="widget">
                     <div class="widget-title"><i class="fa fa-file-o"> 最近文章</i></div>
                     <ul class="post-list">
-                        <li class="post-list-item"><a class="post-list-link" href="/2018/08/14/tx/tx-two/">二阶段提交分布式事务框架源码解析系列(二)之环境搭建</a>
+                        <li class="post-list-item"><a class="post-list-link" href="/2018/08/01/meepo/two/">二阶段提交分布式事务框架源码解析系列(二)之环境搭建</a>
                         </li>
-                        <li class="post-list-item"><a class="post-list-link" href="/2018/08/14/tx/tx-seven/">二阶段提交分布式事务框架源码解析系列之transaction-admin
-                            事务跟踪查看管理后台</a></li>
-                        <li class="post-list-item"><a class="post-list-link" href="/2018/08/14/tx/tx-one/">二阶段提交分布式事务框架源码解析系列(一)之项目结构</a>
+                        <!--<li class="post-list-item"><a class="post-list-link" href="/2018/08/14/tx/tx-seven/">二阶段提交分布式事务框架源码解析系列之transaction-admin-->
+                            <!--事务跟踪查看管理后台</a></li>-->
+                        <li class="post-list-item"><a class="post-list-link" href="/2018/08/01/meepo/one/">二阶段提交分布式事务框架源码解析系列(一)之项目结构</a>
                         </li>
-                        <li class="post-list-item"><a class="post-list-link" href="/2018/08/13/tcc/tcc-seven/">meepo源码解析系列之tcc-admin事务管理后台</a>
-                        </li>
-                        <li class="post-list-item"><a class="post-list-link" href="/2018/08/12/TCC/tcc-five/">meepo源码解析系列(五)之项目实战</a>
-                        </li>
-                        <li class="post-list-item"><a class="post-list-link" href="/2018/08/12/TCC/tcc-four/">meepo源码解析系列(四)之项目实战</a>
-                        </li>
-                        <li class="post-list-item"><a class="post-list-link" href="/2018/08/12/TCC/tcc-three/">meepo源码解析系列(三)之启动详解</a>
-                        </li>
-                        <li class="post-list-item"><a class="post-list-link" href="/2018/08/01/meepo/two/">meepo源码解析系列(二)之环境搭建</a>
-                        </li>
-                        <li class="post-list-item"><a class="post-list-link" href="/2018/08/01/meepo/one/">meepo源码解析系列(一)之项目结构</a>
-                        </li>
+                        <!--<li class="post-list-item"><a class="post-list-link" href="/2018/08/13/tcc/tcc-seven/">meepo源码解析系列之tcc-admin事务管理后台</a>-->
+                        <!--</li>-->
+                        <!--<li class="post-list-item"><a class="post-list-link" href="/2018/08/12/TCC/tcc-five/">meepo源码解析系列(五)之项目实战</a>-->
+                        <!--</li>-->
+                        <!--<li class="post-list-item"><a class="post-list-link" href="/2018/08/12/TCC/tcc-four/">meepo源码解析系列(四)之项目实战</a>-->
+                        <!--</li>-->
+                        <!--<li class="post-list-item"><a class="post-list-link" href="/2018/08/12/TCC/tcc-three/">meepo源码解析系列(三)之启动详解</a>-->
+                        <!--</li>-->
+                        <!--<li class="post-list-item"><a class="post-list-link" href="/2018/08/01/meepo/two/">meepo源码解析系列(二)之环境搭建</a>-->
+                        <!--</li>-->
+                        <!--<li class="post-list-item"><a class="post-list-link" href="/2018/08/01/meepo/one/">meepo源码解析系列(一)之项目结构</a>-->
+                        <!--</li>-->
                     </ul>
                 </div>
                 <div class="widget">
