@@ -32,8 +32,8 @@
       <file leaf-file-name="index.html" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/2018/08/01/meepo/two/index.html">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="-891">
-              <caret line="18" column="74" lean-forward="true" selection-start-line="18" selection-start-column="74" selection-end-line="18" selection-end-column="74" />
+            <state relative-caret-position="184">
+              <caret line="160" column="49" selection-start-line="160" selection-start-column="49" selection-end-line="160" selection-end-column="49" />
             </state>
           </provider>
         </entry>
@@ -236,16 +236,15 @@
       <workItem from="1533191180045" duration="19000" />
       <workItem from="1533193156689" duration="1305000" />
       <workItem from="1533275212748" duration="151000" />
-      <workItem from="1533295824351" duration="4447000" />
+      <workItem from="1533295824351" duration="4698000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="14731000" />
+    <option name="totallyTimeSpent" value="14982000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="23" y="70" width="1360" height="776" extended-state="0" />
-    <editor active="true" />
     <layout>
       <window_info anchor="right" id="Palette" order="3" />
       <window_info anchor="bottom" id="TODO" order="6" />
@@ -362,8 +361,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/2018/08/01/meepo/two/index.html">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-891">
-          <caret line="18" column="74" lean-forward="true" selection-start-line="18" selection-start-column="74" selection-end-line="18" selection-end-column="74" />
+        <state relative-caret-position="184">
+          <caret line="160" column="49" selection-start-line="160" selection-start-column="49" selection-end-line="160" selection-end-column="49" />
         </state>
       </provider>
     </entry>
