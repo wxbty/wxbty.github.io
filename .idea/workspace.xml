@@ -1,12 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="e3af3b7e-5210-43a7-b906-aad60faab4ad" name="Default" comment="">
-      <change beforePath="$PROJECT_DIR$/2018/08/01/meepo/two/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/2018/08/01/meepo/two/index.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/images/meepo/02.png" beforeDir="false" afterPath="$PROJECT_DIR$/images/meepo/02.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/images/meepo/03.png" beforeDir="false" afterPath="$PROJECT_DIR$/images/meepo/03.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/images/meepo/04.png" beforeDir="false" afterPath="$PROJECT_DIR$/images/meepo/04.png" afterDir="false" />
-    </list>
+    <list default="true" id="e3af3b7e-5210-43a7-b906-aad60faab4ad" name="Default" comment="" />
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="TRACKING_ENABLED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -37,8 +32,8 @@
       <file leaf-file-name="index.html" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/2018/08/01/meepo/two/index.html">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="173">
-              <caret line="98" column="59" selection-start-line="98" selection-start-column="59" selection-end-line="98" selection-end-column="59" />
+            <state relative-caret-position="-891">
+              <caret line="18" column="74" lean-forward="true" selection-start-line="18" selection-start-column="74" selection-end-line="18" selection-end-column="74" />
             </state>
           </provider>
         </entry>
@@ -241,12 +236,12 @@
       <workItem from="1533191180045" duration="19000" />
       <workItem from="1533193156689" duration="1305000" />
       <workItem from="1533275212748" duration="151000" />
-      <workItem from="1533295824351" duration="4126000" />
+      <workItem from="1533295824351" duration="4447000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="14410000" />
+    <option name="totallyTimeSpent" value="14731000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="23" y="70" width="1360" height="776" extended-state="0" />
@@ -367,8 +362,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/2018/08/01/meepo/two/index.html">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="173">
-          <caret line="98" column="59" selection-start-line="98" selection-start-column="59" selection-end-line="98" selection-end-column="59" />
+        <state relative-caret-position="-891">
+          <caret line="18" column="74" lean-forward="true" selection-start-line="18" selection-start-column="74" selection-end-line="18" selection-end-column="74" />
         </state>
       </provider>
     </entry>
