@@ -1,5 +1,5 @@
 ---
-title: 二阶段提交分布式事务框架源码解析系列之transaction-admin 事务跟踪查看管理后台
+title: meepo源码解析系列之transaction-admin 事务跟踪查看管理后台
 date: 2017-10-14 11:03:53
 categories: Raincat
 permalink: tx/tx-seven
