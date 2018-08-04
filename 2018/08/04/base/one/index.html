@@ -50,6 +50,10 @@
                                 <p> 某种程度上，可以认为JTA规范是XA规范的Java版，其把XA规范中规定的DTP模型交互接口抽象成Java接口中的方法，并规定每个方法要实现什么样的功能。</p>
                                 <p> 这篇文章可以帮助理解JTA：https://www.ibm.com/developerworks/cn/java/j-lo-jta/</p>
                                 <p> byteJta是XA/JTA的一个开源实现，读者如果对XA/JTA感兴趣，可以参考更知名的Atomikos或者JOTM框架源码</p>
+                                <p><strong>GTS</strong>：GTS是阿里不开源收费的框架，网上只有一些原理分析，meepo可以理解成GTS的一个开源实现，GTS原理：https://zhuanlan.zhihu.com/p/32684212</p>
+                                <p>GTS与XA架构相同，GTS架构由应用、事务管理器、资源管理器三个部分组成。资源管理器由事务分支处理模块、镜像查询构造模块、并发控制模块、恢复控制模块，以及存储在数据库中的GTS事务信息（GTS锁表与GTS日志表）等组成。</p>
+                                <p>所以写一个GTS的实现，不需要重复开发，基于一个已有的XA框架即可，选择byteJta是因为集成dubbo、springcloud，更切合实际项目</p>
+                                <p><img src="https://wxbty.github.io/images/meepo/gts.png" alt="结构图"></p>
                                 <figure class="highlight xml">
                                     <table>
                                         <tr>
