@@ -31,7 +31,7 @@
         <div class="pure-u-1 pure-u-md-3-4">
             <div class="content_container">
                 <div class="post"><h1 class="post-title">meepo源码解析系列(三)之框架架构</h1>
-                    <div class="post-meta">Oct 12, 2017<span> | </span><span class="category"><a
+                    <div class="post-meta">Aug 04, 2018<span> | </span><span class="category"><a
                             href="/categories/meepo/">meepo</a></span></div>
                     <div class="post-content"><h3 id="框架架构详解"><a href="#框架架构详解" class="headerlink" title="框架架构详解"></a>框架架构详解
                     </h3>
@@ -39,7 +39,12 @@
                             <li>通过上面的二篇文章，相信您对meepo应该有个大体的了解，并且已经搭建好了调试环境，那么接下来开始深入理解meepo。</li>
                         </ul>
                         <ul>
-                            <li><p>首先看任何框架的源码都需要找到框架的入口，tcc也不例外，还记得我们在项目中applicationContext.xml有一段这么的配置吗?</p>
+                            <li><p>首先我们需要了解一下几个概念</p>
+                                <p>XA/JTA：两阶段提交其实比较简单，这边有两个资源提供准备和提交两个接口。</p>
+                                <p> 由于隔离性互斥的要求，在事务执行过程中，所有的资源都是被锁定的，这种情况只适合执行时间确定的短事务。
+                                    但是为了保证分布式事务的一致性，大都是采用串行化的隔离级别来保证事务一致性，这样会降低系统的吞吐。</p>
+                                <p> 但因为2PC的协议成本比较高，又有全局锁的问题，性能会比较差。 因此现在大家基本上不会采用这种强一致解决方案。</p>
+                                <p><img src="https://wxbty.github.io/images/meepo/2pc.png" alt="结构图"></p>
                                 <figure class="highlight xml">
                                     <table>
                                         <tr>
