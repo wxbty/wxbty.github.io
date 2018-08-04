@@ -1,10 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="e3af3b7e-5210-43a7-b906-aad60faab4ad" name="Default" comment="">
-      <change beforePath="$PROJECT_DIR$/2018/08/04/base/one/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/2018/08/04/base/one/index.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/2018/08/04/base/two/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/2018/08/04/base/two/index.html" afterDir="false" />
-    </list>
+    <list default="true" id="e3af3b7e-5210-43a7-b906-aad60faab4ad" name="Default" comment="" />
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="TRACKING_ENABLED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -44,8 +41,8 @@
       <file leaf-file-name="index.html" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/2018/08/04/base/two/index.html">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="189">
-              <caret line="80" column="132" selection-start-line="80" selection-start-column="132" selection-end-line="80" selection-end-column="132" />
+            <state relative-caret-position="175">
+              <caret line="46" column="87" selection-start-line="46" selection-start-column="82" selection-end-line="46" selection-end-column="87" />
             </state>
           </provider>
         </entry>
@@ -326,15 +323,16 @@
       <workItem from="1533191180045" duration="19000" />
       <workItem from="1533193156689" duration="1305000" />
       <workItem from="1533275212748" duration="151000" />
-      <workItem from="1533295824351" duration="22761000" />
+      <workItem from="1533295824351" duration="23023000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="33045000" />
+    <option name="totallyTimeSpent" value="33307000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="33" y="-832" width="1360" height="776" extended-state="0" />
+    <editor active="true" />
     <layout>
       <window_info anchor="right" id="Palette" order="3" />
       <window_info anchor="bottom" id="TODO" order="6" />
@@ -497,8 +495,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/2018/08/04/base/two/index.html">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="189">
-          <caret line="80" column="132" selection-start-line="80" selection-start-column="132" selection-end-line="80" selection-end-column="132" />
+        <state relative-caret-position="175">
+          <caret line="46" column="87" selection-start-line="46" selection-start-column="82" selection-end-line="46" selection-end-column="87" />
         </state>
       </provider>
     </entry>
