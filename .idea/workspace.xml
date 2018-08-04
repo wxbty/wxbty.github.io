@@ -44,8 +44,8 @@
       <file leaf-file-name="index.html" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/2018/08/04/base/two/index.html">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="257">
-              <caret line="80" column="149" selection-start-line="80" selection-start-column="149" selection-end-line="80" selection-end-column="149" />
+            <state relative-caret-position="189">
+              <caret line="80" column="132" selection-start-line="80" selection-start-column="132" selection-end-line="80" selection-end-column="132" />
             </state>
           </provider>
         </entry>
@@ -326,16 +326,15 @@
       <workItem from="1533191180045" duration="19000" />
       <workItem from="1533193156689" duration="1305000" />
       <workItem from="1533275212748" duration="151000" />
-      <workItem from="1533295824351" duration="22489000" />
+      <workItem from="1533295824351" duration="22761000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="32773000" />
+    <option name="totallyTimeSpent" value="33045000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="33" y="-832" width="1360" height="776" extended-state="0" />
-    <editor active="true" />
     <layout>
       <window_info anchor="right" id="Palette" order="3" />
       <window_info anchor="bottom" id="TODO" order="6" />
@@ -347,10 +346,10 @@
       <window_info anchor="bottom" id="Database Changes" order="7" show_stripe_button="false" />
       <window_info anchor="bottom" id="Run" order="2" />
       <window_info anchor="bottom" id="Version Control" order="7" />
-      <window_info anchor="bottom" id="Terminal" order="7" visible="true" weight="0.3292683" />
+      <window_info active="true" anchor="bottom" id="Terminal" order="7" visible="true" weight="0.3292683" />
       <window_info id="Capture Tool" order="2" />
       <window_info id="Designer" order="2" />
-      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.26479515" />
+      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.26479515" />
       <window_info anchor="right" id="Database" order="3" />
       <window_info anchor="bottom" id="Find" order="1" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
@@ -498,8 +497,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/2018/08/04/base/two/index.html">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="257">
-          <caret line="80" column="149" selection-start-line="80" selection-start-column="149" selection-end-line="80" selection-end-column="149" />
+        <state relative-caret-position="189">
+          <caret line="80" column="132" selection-start-line="80" selection-start-column="132" selection-end-line="80" selection-end-column="132" />
         </state>
       </provider>
     </entry>
