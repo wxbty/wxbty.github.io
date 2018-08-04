@@ -7,7 +7,7 @@
     <meta content="black-translucent" name="apple-mobile-web-app-status-bar-style">
     <meta content="telephone=no" name="format-detection">
     <meta name="description" content="回到梦开始的地方！">
-    <title>meepo源码解析系列(三)之启动详解 | 飞过海</title>
+    <title>meepo源码解析系列(四)之启动详解 | 飞过海</title>
     <link rel="stylesheet" type="text/css" href="/css/style.css?v=0.0.0">
     <link rel="stylesheet" type="text/css" href="//cdn.bootcss.com/normalize/7.0.0/normalize.min.css">
     <link rel="stylesheet" type="text/css" href="//cdn.bootcss.com/pure/1.0.0/pure-min.css">
@@ -21,7 +21,7 @@
 <body>
 <div class="body_container">
     <div id="header">
-        <div class="site-name"><h1 class="hidden">meepo源码解析系列(三)之启动详解</h1><a id="logo" href="/.">飞过海</a>
+        <div class="site-name"><h1 class="hidden">meepo源码解析系列(四)之启动详解</h1><a id="logo" href="/.">飞过海</a>
             <p class="description">回到梦开始的地方！</p></div>
         <div id="nav-menu"><a href="/." class="current"><i class="fa fa-home"> 首页</i></a><a href="/archives/"><i
                 class="fa fa-archive"> 归档</i></a><a href="/about/"><i class="fa fa-user"> 关于</i></a><a href="/atom.xml"><i
@@ -30,121 +30,38 @@
     <div id="layout" class="pure-g">
         <div class="pure-u-1 pure-u-md-3-4">
             <div class="content_container">
-                <div class="post"><h1 class="post-title">meepo源码解析系列(三)之框架架构</h1>
+                <div class="post"><h1 class="post-title">meepo源码解析系列(四)之启动详解</h1>
                     <div class="post-meta">Aug 04, 2018<span> | </span><span class="category"><a
                             href="/categories/meepo/">meepo</a></span></div>
-                    <div class="post-content"><h3 id="框架架构详解"><a href="#框架架构详解" class="headerlink" title="框架架构详解"></a>框架架构详解
+                    <div class="post-content"><h3 id="启动详解"><a href="#启动详解" class="headerlink" title="启动详解"></a>启动详解
                     </h3>
                         <ul>
-                            <li>通过上面的二篇文章，相信您对meepo应该有个大体的了解，并且已经搭建好了调试环境，那么接下来开始深入理解meepo。</li>
+                            <li>本篇文章开始，我们将开始阅读源码</li>
                         </ul>
                         <ul>
-                            <li><p>首先看任何框架的源码都需要找到框架的入口，tcc也不例外，还记得我们在项目中applicationContext.xml有一段这么的配置吗?</p>
-                                <figure class="highlight xml">
-                                    <table>
-                                        <tr>
-                                            <td class="gutter">
-                                                <pre><div class="line">1</div><div class="line">2</div><div
-                                                        class="line">3</div><div class="line">4</div><div
-                                                        class="line">5</div><div class="line">6</div><div
-                                                        class="line">7</div><div class="line">8</div><div
-                                                        class="line">9</div><div class="line">10</div><div class="line">11</div><div
-                                                        class="line">12</div><div class="line">13</div><div
-                                                        class="line">14</div><div class="line">15</div><div
-                                                        class="line">16</div><div class="line">17</div><div
-                                                        class="line">18</div><div class="line">19</div><div
-                                                        class="line">20</div><div class="line">21</div><div
-                                                        class="line">22</div><div class="line">23</div><div
-                                                        class="line">24</div><div class="line">25</div><div
-                                                        class="line">26</div></pre>
-                                            </td>
-                                            <td class="code">
-                                                <pre><div class="line"><span class="comment">&lt;!-- Aspect 切面配置，是否开启AOP切面--&gt;</span></div><div
-                                                        class="line">  <span class="tag">&lt;<span class="name">aop:aspectj-autoproxy</span> <span
-                                                        class="attr">expose-proxy</span>=<span
-                                                        class="string">"true"</span>/&gt;</span></div><div class="line">  <span
-                                                        class="comment">&lt;!--扫描框架的包--&gt;</span></div><div
-                                                        class="line">  <span class="tag">&lt;<span class="name">context:component-scan</span> <span
-                                                        class="attr">base-package</span>=<span class="string">"com.hmily.tcc.*"</span>/&gt;</span></div><div
-                                                        class="line">  <span class="comment">&lt;!--启动类属性配置--&gt;</span></div><div
-                                                        class="line">  <span class="tag">&lt;<span
-                                                        class="name">bean</span> <span class="attr">id</span>=<span
-                                                        class="string">"tccTransactionBootstrap"</span> <span
-                                                        class="attr">class</span>=<span class="string">"com.hmily.tcc.core.bootstrap.TccTransactionBootstrap"</span>&gt;</span></div><div
-                                                        class="line">         <span class="tag">&lt;<span class="name">property</span> <span
-                                                        class="attr">name</span>=<span
-                                                        class="string">"serializer"</span> <span
-                                                        class="attr">value</span>=<span class="string">"kryo"</span>/&gt;</span></div><div
-                                                        class="line">         <span class="tag">&lt;<span class="name">property</span> <span
-                                                        class="attr">name</span>=<span class="string">"coordinatorQueueMax"</span> <span
-                                                        class="attr">value</span>=<span class="string">"5000"</span>/&gt;</span></div><div
-                                                        class="line">         <span class="tag">&lt;<span class="name">property</span> <span
-                                                        class="attr">name</span>=<span class="string">"coordinatorThreadMax"</span> <span
-                                                        class="attr">value</span>=<span
-                                                        class="string">"4"</span>/&gt;</span></div><div class="line">         <span
-                                                        class="tag">&lt;<span class="name">property</span> <span
-                                                        class="attr">name</span>=<span
-                                                        class="string">"recoverDelayTime"</span> <span class="attr">value</span>=<span
-                                                        class="string">"120"</span>/&gt;</span></div><div class="line">         <span
-                                                        class="tag">&lt;<span class="name">property</span> <span
-                                                        class="attr">name</span>=<span class="string">"retryMax"</span> <span
-                                                        class="attr">value</span>=<span
-                                                        class="string">"3"</span>/&gt;</span></div><div class="line">         <span
-                                                        class="tag">&lt;<span class="name">property</span> <span
-                                                        class="attr">name</span>=<span
-                                                        class="string">"rejectPolicy"</span> <span
-                                                        class="attr">value</span>=<span class="string">"Abort"</span>/&gt;</span></div><div
-                                                        class="line">         <span class="tag">&lt;<span class="name">property</span> <span
-                                                        class="attr">name</span>=<span class="string">"blockingQueueType"</span> <span
-                                                        class="attr">value</span>=<span class="string">"Linked"</span>/&gt;</span></div><div
-                                                        class="line">         <span class="tag">&lt;<span class="name">property</span> <span
-                                                        class="attr">name</span>=<span
-                                                        class="string">"scheduledDelay"</span> <span
-                                                        class="attr">value</span>=<span class="string">"120"</span>/&gt;</span></div><div
-                                                        class="line">         <span class="tag">&lt;<span class="name">property</span> <span
-                                                        class="attr">name</span>=<span class="string">"scheduledThreadMax"</span> <span
-                                                        class="attr">value</span>=<span
-                                                        class="string">"4"</span>/&gt;</span></div><div class="line">         <span
-                                                        class="tag">&lt;<span class="name">property</span> <span
-                                                        class="attr">name</span>=<span class="string">"repositorySupport"</span> <span
-                                                        class="attr">value</span>=<span class="string">"db"</span>/&gt;</span></div><div
-                                                        class="line">         <span class="tag">&lt;<span class="name">property</span> <span
-                                                        class="attr">name</span>=<span
-                                                        class="string">"tccDbConfig"</span>&gt;</span></div><div
-                                                        class="line">             <span class="tag">&lt;<span
-                                                        class="name">bean</span> <span class="attr">class</span>=<span
-                                                        class="string">"com.hmily.tcc.common.config.TccDbConfig"</span>&gt;</span></div><div
-                                                        class="line">                 <span class="tag">&lt;<span
-                                                        class="name">property</span> <span
-                                                        class="attr">name</span>=<span
-                                                        class="string">"url"</span></span></div><div class="line"><span
-                                                        class="tag">                           <span
-                                                        class="attr">value</span>=<span class="string">"jdbc:mysql://192.168.1.68:3306/account?useUnicode=true&amp;amp;characterEncoding=utf8"</span>/&gt;</span></div><div
-                                                        class="line">                 <span class="tag">&lt;<span
-                                                        class="name">property</span> <span
-                                                        class="attr">name</span>=<span
-                                                        class="string">"driverClassName"</span> <span
-                                                        class="attr">value</span>=<span class="string">"com.mysql.jdbc.Driver"</span>/&gt;</span></div><div
-                                                        class="line">                 <span class="tag">&lt;<span
-                                                        class="name">property</span> <span
-                                                        class="attr">name</span>=<span class="string">"password"</span> <span
-                                                        class="attr">value</span>=<span
-                                                        class="string">"Wgj@555888"</span>/&gt;</span></div><div
-                                                        class="line">                 <span class="tag">&lt;<span
-                                                        class="name">property</span> <span
-                                                        class="attr">name</span>=<span class="string">"username"</span> <span
-                                                        class="attr">value</span>=<span class="string">"xiaoyu"</span>/&gt;</span></div><div
-                                                        class="line">             <span class="tag">&lt;/<span
-                                                        class="name">bean</span>&gt;</span></div><div class="line">         <span
-                                                        class="tag">&lt;/<span
-                                                        class="name">property</span>&gt;</span></div><div class="line">     <span
-                                                        class="tag">&lt;/<span class="name">bean</span>&gt;</span></div></pre>
-                                            </td>
-                                        </tr>
-                                    </table>
-                                </figure>
+                            <li><p>首先看任何框架的源码都需要找到框架的入口，meepo也不例外，先看meepo-test里bussiness方法片段</p>
+                                <p><img src="https://wxbty.github.io/images/meepo/code1.png" alt=""></p>
                             </li>
-                            <li><p>通过以上的配置我们知道首先需要开启Aop切面，再扫描框架的包，重点我们来关注 <strong>TccTransactionBootstrap</strong></p>
+                            <li><p>以上的事务配置和本地事务没有区别，用一个@Transactional注解表面方法里sql受事务控制。</p>
+                                <p>我们知道，spring的声明式事务由aop实现，在注解方法前后加上事务控制代码，如下</p>
+                                <p><img src="https://wxbty.github.io/images/meepo/code2.png" alt=""></p>
+                                <p>获取事务管理器</p>
+                                <p>final PlatformTransactionManager tm = determineTransactionManager(txAttr);</p>
+                                <p>determineTransactionManager方法：protected PlatformTransactionManager determineTransactionManager(TransactionAttribute txAttr) {
+                                    // Do not attempt to lookup tx manager if no tx attributes are set
+                                    if (txAttr == null || this.beanFactory == null) {
+                                    return getTransactionManager();
+                                    }</p>
+                                <p>public PlatformTransactionManager getTransactionManager() {
+                                    return this.transactionManager;
+                                    }</p>
+                                <p>这里的transactionManager，可以是spring自带，也可以我们自己在xml里配置一个实现PlatformTransactionManager接口的bean来代替</p>
+                                <p>jar包里的jta-supports-dubbo.xml配置了自定义的事务管理器</p>
+                                <p><img src="https://wxbty.github.io/images/meepo/code3.png" alt=""></p>
+                                <p>JtaTransactionManager 实现了 PlatformTransactionManager接口</p>
+                                <p>public class JtaTransactionManager extends AbstractPlatformTransactionManager
+                                    implements TransactionFactory, InitializingBean, Serializable</p>
+                                <p>public abstract class AbstractPlatformTransactionManager implements PlatformTransactionManager, Serializable</p>
                             </li>
                         </ul>
                         <h3 id="TccTransactionBootstrap-源码解析"><a href="#TccTransactionBootstrap-源码解析" class="headerlink"
@@ -401,7 +318,7 @@
                                 title="到此tcc框架的初始化就已经完成的启动，是不是很简单？如有任何问题或者建议欢迎加入QQ群：162614487 进行讨论"></a>到此tcc框架的初始化就已经完成的启动，是不是很简单？如有任何问题或者建议欢迎加入QQ群：162614487
                             进行讨论</h3></div>
                     <div class="tags"></div>
-                    <div class="post-nav"><a href="/2018/08/04/base/tcc-four/" class="pre">meepo源码解析系列(四)之项目实战</a><a
+                    <div class="post-nav"><a href="/2018/08/04/base/two/" class="pre">meepo源码解析系列(四)之项目实战</a><a
                             href="/2018/08/01/start/two/" class="next">meepo源码解析系列(二)之环境搭建</a></div>
                 </div>
             </div>
@@ -440,7 +357,7 @@
                         </li>
                         <li class="post-list-item"><a class="post-list-link" href="/2018/08/04/base/tcc-five/">meepo源码解析系列(五)之项目实战</a>
                         </li>
-                        <li class="post-list-item"><a class="post-list-link" href="/2018/08/04/base/tcc-four/">meepo源码解析系列(四)之项目实战</a>
+                        <li class="post-list-item"><a class="post-list-link" href="/2018/08/04/base/two/">meepo源码解析系列(四)之项目实战</a>
                         </li>
                         <li class="post-list-item"><a class="post-list-link" href="/2018/08/04/base/one/">meepo源码解析系列(三)之启动详解</a>
                         </li>

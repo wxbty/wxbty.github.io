@@ -1,7 +1,21 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="e3af3b7e-5210-43a7-b906-aad60faab4ad" name="Default" comment="" />
+    <list default="true" id="e3af3b7e-5210-43a7-b906-aad60faab4ad" name="Default" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/2018/08/04/base/tcc-five/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/2018/08/04/base/tcc-five/index.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/2018/08/04/base/tcc-four/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/2018/08/04/base/two/index.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/2018/08/13/tcc/tcc-seven/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/2018/08/13/tcc/tcc-seven/index.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/2018/08/14/tx/tx-one/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/2018/08/14/tx/tx-one/index.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/2018/08/14/tx/tx-seven/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/2018/08/14/tx/tx-seven/index.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/2018/08/14/tx/tx-two/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/2018/08/14/tx/tx-two/index.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/archives/2017/10/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/archives/2017/10/index.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/archives/2017/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/archives/2017/index.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/archives/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/archives/index.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/categories/Raincat/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/categories/Raincat/index.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/categories/hmily-tcc/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/categories/hmily-tcc/index.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/hello-word/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/hello-word/index.html" afterDir="false" />
+    </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="TRACKING_ENABLED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -11,11 +25,11 @@
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file leaf-file-name="index.html" pinned="false" current-in-tab="true">
+      <file leaf-file-name="index.html" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/2018/08/04/base/one/index.html">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="256">
-              <caret line="147" column="23" lean-forward="true" selection-start-line="147" selection-start-column="23" selection-end-line="147" selection-end-column="23" />
+            <state relative-caret-position="716">
+              <caret line="104" column="36" lean-forward="true" selection-start-line="104" selection-start-column="36" selection-end-line="104" selection-end-column="36" />
             </state>
           </provider>
         </entry>
@@ -23,17 +37,26 @@
       <file leaf-file-name="index.html" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/2018/08/01/start/one/index.html">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="147">
-              <caret line="98" column="85" lean-forward="true" selection-start-line="98" selection-start-column="85" selection-end-line="98" selection-end-column="85" />
+            <state relative-caret-position="133">
+              <caret line="104" column="125" selection-start-line="104" selection-start-column="106" selection-end-line="104" selection-end-column="125" />
             </state>
           </provider>
         </entry>
       </file>
       <file leaf-file-name="index.html" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/2018/08/04/base/tcc-four/index.html">
+        <entry file="file://$PROJECT_DIR$/2018/08/01/start/two/index.html">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="521">
-              <caret line="462" column="53" selection-start-line="462" selection-start-column="53" selection-end-line="462" selection-end-column="53" />
+            <state relative-caret-position="256">
+              <caret line="83" column="101" lean-forward="true" selection-start-line="83" selection-start-column="32" selection-end-line="83" selection-end-column="101" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="index.html" pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/2018/08/04/base/two/index.html">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="202">
+              <caret line="59" column="87" selection-start-line="59" selection-start-column="87" selection-end-line="59" selection-end-column="87" />
             </state>
           </provider>
         </entry>
@@ -54,6 +77,7 @@
       <find>/2018/08/14/tx/tx-one/</find>
       <find>/2018/08/14/tx/tx-two/</find>
       <find>/2018/08/13/tcc/tcc-seven/</find>
+      <find>meepo源码解析系列之tcc-admin事务管理后台</find>
     </findStrings>
     <replaceStrings>
       <replace>meepo源码</replace>
@@ -67,6 +91,7 @@
       <replace>/2018/08/01/start/one/</replace>
       <replace>/2018/08/01/start/two/</replace>
       <replace>/2018/08/04/base/one/</replace>
+      <replace>meepo源码解析系列(三)之框架架构</replace>
     </replaceStrings>
   </component>
   <component name="Git.Settings">
@@ -79,10 +104,11 @@
         <option value="$PROJECT_DIR$/2018/08/12/TCC/tcc-three/index.html" />
         <option value="$PROJECT_DIR$/2018/08/01/meepo/two/index.html" />
         <option value="$PROJECT_DIR$/2018/08/04/base/tcc-five/index.html" />
-        <option value="$PROJECT_DIR$/2018/08/01/start/two/index.html" />
         <option value="$PROJECT_DIR$/2018/08/04/base/tcc-four/index.html" />
         <option value="$PROJECT_DIR$/2018/08/01/start/one/index.html" />
+        <option value="$PROJECT_DIR$/2018/08/01/start/two/index.html" />
         <option value="$PROJECT_DIR$/2018/08/04/base/one/index.html" />
+        <option value="$PROJECT_DIR$/2018/08/04/base/two/index.html" />
       </list>
     </option>
   </component>
@@ -99,8 +125,8 @@
     </packageJsonPaths>
   </component>
   <component name="ProjectFrameBounds">
-    <option name="x" value="23" />
-    <option name="y" value="70" />
+    <option name="x" value="33" />
+    <option name="y" value="-832" />
     <option name="width" value="1360" />
     <option name="height" value="776" />
   </component>
@@ -201,7 +227,7 @@
               <item name="08" type="462c0819:PsiDirectoryNode" />
               <item name="04" type="462c0819:PsiDirectoryNode" />
               <item name="base" type="462c0819:PsiDirectoryNode" />
-              <item name="tcc-four" type="462c0819:PsiDirectoryNode" />
+              <item name="two" type="462c0819:PsiDirectoryNode" />
             </path>
             <path>
               <item name="wxbty.github.io" type="b2602c69:ProjectViewProjectNode" />
@@ -311,15 +337,15 @@
       <workItem from="1533191180045" duration="19000" />
       <workItem from="1533193156689" duration="1305000" />
       <workItem from="1533275212748" duration="151000" />
-      <workItem from="1533295824351" duration="16671000" />
+      <workItem from="1533295824351" duration="19137000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="26955000" />
+    <option name="totallyTimeSpent" value="29421000" />
   </component>
   <component name="ToolWindowManager">
-    <frame x="23" y="70" width="1360" height="776" extended-state="0" />
+    <frame x="33" y="-832" width="1360" height="776" extended-state="0" />
     <editor active="true" />
     <layout>
       <window_info anchor="right" id="Palette" order="3" />
@@ -332,10 +358,10 @@
       <window_info anchor="bottom" id="Database Changes" order="7" show_stripe_button="false" />
       <window_info anchor="bottom" id="Run" order="2" />
       <window_info anchor="bottom" id="Version Control" order="7" />
-      <window_info active="true" anchor="bottom" id="Terminal" order="7" visible="true" weight="0.3292683" />
+      <window_info anchor="bottom" id="Terminal" order="7" visible="true" weight="0.3292683" />
       <window_info id="Capture Tool" order="2" />
       <window_info id="Designer" order="2" />
-      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.26479515" />
+      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.26479515" />
       <window_info anchor="right" id="Database" order="3" />
       <window_info anchor="bottom" id="Find" order="1" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
@@ -437,13 +463,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/2018/08/01/start/two/index.html">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="710">
-          <caret line="100" column="29" lean-forward="true" selection-start-line="100" selection-start-column="29" selection-end-line="100" selection-end-column="29" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/2018/08/04/base/tcc-five/index.html">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="-11014" />
@@ -467,24 +486,31 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/2018/08/04/base/tcc-four/index.html">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="521">
-          <caret line="462" column="53" selection-start-line="462" selection-start-column="53" selection-end-line="462" selection-end-column="53" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/2018/08/01/start/one/index.html">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="147">
-          <caret line="98" column="85" lean-forward="true" selection-start-line="98" selection-start-column="85" selection-end-line="98" selection-end-column="85" />
+        <state relative-caret-position="133">
+          <caret line="104" column="125" selection-start-line="104" selection-start-column="106" selection-end-line="104" selection-end-column="125" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/2018/08/04/base/one/index.html">
       <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="716">
+          <caret line="104" column="36" lean-forward="true" selection-start-line="104" selection-start-column="36" selection-end-line="104" selection-end-column="36" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/2018/08/01/start/two/index.html">
+      <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="256">
-          <caret line="147" column="23" lean-forward="true" selection-start-line="147" selection-start-column="23" selection-end-line="147" selection-end-column="23" />
+          <caret line="83" column="101" lean-forward="true" selection-start-line="83" selection-start-column="32" selection-end-line="83" selection-end-column="101" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/2018/08/04/base/two/index.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="202">
+          <caret line="59" column="87" selection-start-line="59" selection-start-column="87" selection-end-line="59" selection-end-column="87" />
         </state>
       </provider>
     </entry>
