@@ -40,12 +40,12 @@
                         </ul>
                         <ul>
                             <li><p>首先我们需要了解一下几个概念</p>
-                                <p>XA协议：两阶段提交其实比较简单，这边有两个资源提供准备和提交两个接口。</p>
+                                <p><strong>XA协议</strong>：两阶段提交其实比较简单，这边有两个资源提供准备和提交两个接口。</p>
                                 <p> 由于隔离性互斥的要求，在事务执行过程中，所有的资源都是被锁定的，这种情况只适合执行时间确定的短事务。
                                     但是为了保证分布式事务的一致性，大都是采用串行化的隔离级别来保证事务一致性，这样会降低系统的吞吐。</p>
                                 <p> 但因为2PC的协议成本比较高，又有全局锁的问题，性能会比较差。 因此现在大家基本上不会采用这种强一致解决方案。</p>
                                 <p><img src="https://wxbty.github.io/images/meepo/2pc.png" alt="结构图"></p>
-                                <p>JTA规范：Java事务API（JTA：Java Transaction API）和它的同胞Java事务服务（JTS：Java Transaction
+                                <p><strong>JTA规范</strong>：Java事务API（JTA：Java Transaction API）和它的同胞Java事务服务（JTS：Java Transaction
                                     Service），为J2EE平台提供了分布式事务服务（distributed transaction）的能力。</p>
                                 <p> 某种程度上，可以认为JTA规范是XA规范的Java版，其把XA规范中规定的DTP模型交互接口抽象成Java接口中的方法，并规定每个方法要实现什么样的功能。</p>
                                 <p> 这篇文章可以帮助理解JTA：https://www.ibm.com/developerworks/cn/java/j-lo-jta/</p>
