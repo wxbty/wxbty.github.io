@@ -42,26 +42,21 @@
                             <li><p>首先看任何框架的源码都需要找到框架的入口，meepo也不例外，先看meepo-test里bussiness方法片段</p>
                                 <p><img src="https://wxbty.github.io/images/meepo/code1.png" alt=""></p>
                             </li>
-                            <li><p>以上的事务配置和本地事务没有区别，用一个@Transactional注解表面方法里sql受事务控制。</p>
+                            <li><p>以上的事务配置和本地事务没有区别，用一个@Transactional注解表示方法的sql被事务管理。</p>
                                 <p>我们知道，spring的声明式事务由aop实现，在注解方法前后加上事务控制代码，如下</p>
                                 <p><img src="https://wxbty.github.io/images/meepo/code2.png" alt=""></p>
                                 <p>获取事务管理器</p>
                                 <p>final PlatformTransactionManager tm = determineTransactionManager(txAttr);</p>
-                                <p>determineTransactionManager方法：protected PlatformTransactionManager determineTransactionManager(TransactionAttribute txAttr) {
-                                    // Do not attempt to lookup tx manager if no tx attributes are set
-                                    if (txAttr == null || this.beanFactory == null) {
-                                    return getTransactionManager();
-                                    }</p>
-                                <p>public PlatformTransactionManager getTransactionManager() {
-                                    return this.transactionManager;
-                                    }</p>
+                                <p><img src="https://wxbty.github.io/images/meepo/code_a1.png" alt=""></p>
+                                <p><img src="https://wxbty.github.io/images/meepo/code_a2.png" alt=""></p>
                                 <p>这里的transactionManager，可以是spring自带，也可以我们自己在xml里配置一个实现PlatformTransactionManager接口的bean来代替</p>
                                 <p>jar包里的jta-supports-dubbo.xml配置了自定义的事务管理器</p>
                                 <p><img src="https://wxbty.github.io/images/meepo/code3.png" alt=""></p>
-                                <p>JtaTransactionManager 实现了 PlatformTransactionManager接口</p>
-                                <p>public class JtaTransactionManager extends AbstractPlatformTransactionManager
-                                    implements TransactionFactory, InitializingBean, Serializable</p>
-                                <p>public abstract class AbstractPlatformTransactionManager implements PlatformTransactionManager, Serializable</p>
+                                <p><img src="https://wxbty.github.io/images/meepo/code_a4.png" alt=""></p>
+                                <p><img src="https://wxbty.github.io/images/meepo/code_a5.png" alt=""></p>
+                                <p>这样JtaTransactionManager接管了spring的声明式事务，如上面的回滚和提交代码</p>
+                                <p><img src="https://wxbty.github.io/images/meepo/code4.png" alt=""></p>
+                                <p><img src="https://wxbty.github.io/images/meepo/code5.png" alt=""></p>
                             </li>
                         </ul>
                         <h3 id="TccTransactionBootstrap-源码解析"><a href="#TccTransactionBootstrap-源码解析" class="headerlink"
