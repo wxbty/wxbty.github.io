@@ -62,7 +62,7 @@
                                 <p>byteJta回滚流程：发起全局事务->执行业务（加入事务组）->发起全局prepare（任一失败）->发起全局rollback</p>
                                 <p>meepo回滚流程：发起全局事务->执行业务（加入事务组,prepare分支事务,commit分支事务，任一失败）->rollback（异步回滚日志镜像，清理分支事务信息）</p>
                             </li>
-                            <li><p>正常业务中，byteJta最后一个分支commit前，会锁定所有分支业务对应的数据行，直到所有业务成功提交，整个过程效率非常低，整体速度通常取决于网速最慢的业务分支 <strong>TccTransactionBootstrap</strong></p>
+                            <li><p>正常业务中，byteJta最后一个分支commit前，会锁定所有分支业务对应的数据行，直到所有业务成功提交，整个过程效率非常低，整体速度通常取决于网速最慢的业务分支 </p>
                             <p>meepo在执行业务时直接prepare、commit分支事务，分支事务生命周期与本地事务相同，效率非常的高</p>
                             </li>
                         </ul>
@@ -141,57 +141,103 @@
     <script type="text/javascript" src="/js/codeblock-resizer.js?v=0.0.0"></script>
     <script type="text/javascript" src="/js/smartresize.js?v=0.0.0"></script>
 </div>
+<span id="num"></span>
 
-<script language=JavaScript>
+<SCRIPT language=JavaScript>
     <!--
     var caution = false
-    function setCookie(name, value, expires, path, domain, secure){
+    function setCookie(name, value, expires, path, domain, secure) {
         var curCookie = name + "=" + escape(value) +
+
             ((expires) ? "; expires=" + expires.toGMTString() : "") +
+
             ((path) ? "; path=" + path : "") +
+
             ((domain) ? "; domain=" + domain : "") +
+
             ((secure) ? "; secure" : "")
-        if (!caution || (name + "=" + escape(value)).length<= 4000)
+
+        if (!caution || (name + "=" + escape(value)).length <= 4000)
+
             document.cookie = curCookie
+
         else
+
         if (confirm("Cookie exceeds 4KB and will be cut!"))
+
             document.cookie = curCookie
+
     }
+
     function getCookie(name) {
+
         var prefix = name + "="
+
         var cookieStartIndex = document.cookie.indexOf(prefix)
+
         if (cookieStartIndex == -1)
+
             return null
-        var cookieEndIndex = document.cookie.indexOf(";", cookieStartIndex+ prefix.length)
+
+        var cookieEndIndex = document.cookie.indexOf(";", cookieStartIndex + prefix.length)
+
         if (cookieEndIndex == -1)
+
             cookieEndIndex = document.cookie.length
-        return unescape(document.cookie.substring(cookieStartIndex +prefix.length, cookieEndIndex))
+
+        return (document.cookie.substring(cookieStartIndex + prefix.length, cookieEndIndex))
+
     }
+
     function deleteCookie(name, path, domain) {
+
         if (getCookie(name)) {
+
             document.cookie = name + "=" +
+
                 ((path) ? "; path=" + path : "") +
+
                 ((domain) ? "; domain=" + domain : "") +
+
                 "; expires=Thu, 01-Jan-70 00:00:01 GMT"
+
         }
+
     }
+
     function fixDate(date) {
+
         var base = new Date(0)
+
         var skew = base.getTime()
+
         if (skew > 0)
+
             date.setTime(date.getTime() - skew)
+
     }
+
     var now = new Date()
+
     fixDate(now)
+
     now.setTime(now.getTime() + 365 * 24 * 60 * 60 * 1000)
+
     var visits = getCookie("counter")
+
     if (!visits)
+
         visits = 1
+
     else
+
         visits = parseInt(visits) + 1
+
     setCookie("counter", visits, now)
-    document.write("您是第" + visits + "位访问本专题的！")
+    //alert(visits);
+    document.getElementById("num").innerHTML = visits;
+    //document.write("欢迎光临本站，您是第" + visits + "访问者！")
     // -->
-</script>
+</SCRIPT>
 </body>
 </html>
