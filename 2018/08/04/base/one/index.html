@@ -55,10 +55,10 @@
                                 <p>所以写一个GTS的实现，不需要重复开发，基于一个已有的XA框架即可，选择byteJta是因为集成dubbo、springcloud，更切合实际项目</p>
                                 <p><img src="https://wxbty.github.io/images/meepo/gts.png" alt="结构图"></p>
                                 <p>meepo正常业务时序图</p>
-                                <p><img src="https://wxbty.github.io/images/meepo/meepo.png" alt="meepo流程图"></p>
+                                <p><img src="https://wxbty.github.io/images/meepo/meepo.png" alt="meepo-commit流程图"></p>
                                 <p>byteJta正常流程：发起全局事务->执行业务（加入事务组）->发起全局prepare（全体通过）->发起全局commit</p>
                                 <p>meepo正常流程：发起全局事务->执行业务（加入事务组,prepare分支事务,commit分支事务）->发起全局commit（异步清理分支事务信息）</p>
-                                <p><img src="https://wxbty.github.io/images/meepo/meepo_rollback.png" alt="meepo流程图"></p>
+                                <p><img src="https://wxbty.github.io/images/meepo/meepo_rollback.png" alt="meepo-rollback流程图"></p>
                                 <p>byteJta回滚流程：发起全局事务->执行业务（加入事务组）->发起全局prepare（任一失败）->发起全局rollback</p>
                                 <p>meepo回滚流程：发起全局事务->执行业务（加入事务组,prepare分支事务,commit分支事务，任一失败）->rollback（异步回滚日志镜像，清理分支事务信息）</p>
                             </li>
