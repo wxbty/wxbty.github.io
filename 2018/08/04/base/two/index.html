@@ -62,10 +62,10 @@
                         </ul>
                         <h3 id="JtaTransactionManager-源码解析"><a href="#JtaTransactionManager-源码解析" class="headerlink"
                                                                  title="JtaTransactionManager 源码解析"></a>JtaTransactionManager
-                            源码解析</h3>
+                            解析</h3>
 
                         <ul>
-                            <li><p>按照JTA规范，JtaTransactionManager里初始化了userTransaction和transactionManager两个成员实例，这里不清楚的再回头看上篇文章里的 <strong>JTA 深度历险</strong>
+                            <li><p>按照JTA规范，JtaTransactionManager里初始化了userTransaction和transactionManager两个成员实例，这里不清楚的同学再回头看上篇文章里的 <strong>JTA 深度历险</strong>
                             </p>
                             </li>
                             <li><p>我们继续跟踪代码，进入userTransaction的实现类<strong>UserTransactionImpl</strong> 方法</p>
@@ -82,148 +82,15 @@
                             </li>
                             <li><p><strong>LoadSpiSupport</strong> 采用jdk自带的spi加载，如果有不明白的小伙伴，可以自行google</p>
                             </li>
-                            <li><p>我们继续进入 <strong>coordinatorService.start(tccConfig)</strong></p>
-                                <figure class="highlight java">
-                                    <table>
-                                        <tr>
-                                            <td class="gutter">
-                                                <pre><div class="line">1</div><div class="line">2</div><div
-                                                        class="line">3</div><div class="line">4</div><div
-                                                        class="line">5</div><div class="line">6</div><div
-                                                        class="line">7</div><div class="line">8</div><div
-                                                        class="line">9</div><div class="line">10</div><div class="line">11</div><div
-                                                        class="line">12</div><div class="line">13</div><div
-                                                        class="line">14</div></pre>
-                                            </td>
-                                            <td class="code">
-                                                <pre><div class="line"><span class="meta">@Override</span></div><div
-                                                        class="line">  <span class="function"><span class="keyword">public</span> <span
-                                                        class="keyword">void</span> <span
-                                                        class="title">start</span><span class="params">(TccConfig tccConfig)</span> <span
-                                                        class="keyword">throws</span> Exception </span>&#123;</div><div
-                                                        class="line">      <span class="keyword">this</span>.tccConfig = tccConfig;</div><div
-                                                        class="line">      <span class="comment">//获取应用名称</span></div><div
-                                                        class="line">      <span class="keyword">final</span> String appName = applicationService.acquireName();</div><div
-                                                        class="line">      <span
-                                                        class="comment">//获取上一步加载的spi资源信息</span></div><div class="line">      coordinatorRepository = SpringBeanUtils.getInstance().getBean(CoordinatorRepository.class);</div><div
-                                                        class="line">      <span class="comment">//初始化spi 协调资源存储</span></div><div
-                                                        class="line">      coordinatorRepository.init(appName, tccConfig);</div><div
-                                                        class="line">      <span
-                                                        class="comment">//初始化 协调资源线程池</span></div><div class="line">      initCoordinatorPool();</div><div
-                                                        class="line">      <span class="comment">//定时执行补偿</span></div><div
-                                                        class="line">      scheduledRollBack();</div><div class="line">  &#125;</div></pre>
-                                            </td>
-                                        </tr>
-                                    </table>
-                                </figure>
-                            </li>
-                            <li><p><strong>coordinatorRepository.init(appName, tccConfig)</strong>
-                                就是根据spi思想来具体初始化，现在支持的如图：<br><img src="https://wxbty.github.io/images/meepo/06.png"
-                                                                 alt=""></p>
-                            </li>
-                            <li><p><strong>initCoordinatorPool()</strong> 初始化 协调资源线程池</p>
-                                <figure class="highlight java">
-                                    <table>
-                                        <tr>
-                                            <td class="gutter">
-                                                <pre><div class="line">1</div><div class="line">2</div><div
-                                                        class="line">3</div><div class="line">4</div><div
-                                                        class="line">5</div><div class="line">6</div><div
-                                                        class="line">7</div><div class="line">8</div><div
-                                                        class="line">9</div><div class="line">10</div><div class="line">11</div><div
-                                                        class="line">12</div><div class="line">13</div><div
-                                                        class="line">14</div><div class="line">15</div><div
-                                                        class="line">16</div><div class="line">17</div><div
-                                                        class="line">18</div><div class="line">19</div><div
-                                                        class="line">20</div><div class="line">21</div><div
-                                                        class="line">22</div><div class="line">23</div><div
-                                                        class="line">24</div><div class="line">25</div><div
-                                                        class="line">26</div><div class="line">27</div><div
-                                                        class="line">28</div><div class="line">29</div><div
-                                                        class="line">30</div><div class="line">31</div><div
-                                                        class="line">32</div><div class="line">33</div><div
-                                                        class="line">34</div><div class="line">35</div><div
-                                                        class="line">36</div><div class="line">37</div><div
-                                                        class="line">38</div><div class="line">39</div><div
-                                                        class="line">40</div><div class="line">41</div><div
-                                                        class="line">42</div><div class="line">43</div><div
-                                                        class="line">44</div><div class="line">45</div><div
-                                                        class="line">46</div></pre>
-                                            </td>
-                                            <td class="code">
-                                                <pre><div class="line"> <span class="function"><span class="keyword">private</span> <span
-                                                        class="keyword">void</span> <span class="title">initCoordinatorPool</span><span
-                                                        class="params">()</span> </span>&#123;</div><div class="line">     <span
-                                                        class="keyword">synchronized</span> (LOGGER) &#123;</div><div
-                                                        class="line">         <span class="comment">//采用LinkedBlockingQueue</span></div><div
-                                                        class="line">         QUEUE = <span class="keyword">new</span> LinkedBlockingQueue&lt;&gt;(tccConfig.getCoordinatorQueueMax());</div><div
-                                                        class="line">         <span class="keyword">final</span> <span
-                                                        class="keyword">int</span> coordinatorThreadMax = tccConfig.getCoordinatorThreadMax();</div><div
-                                                        class="line">         <span class="keyword">final</span> TccTransactionThreadPool threadPool = SpringBeanUtils.getInstance().getBean(TccTransactionThreadPool.class);</div><div
-                                                        class="line">         <span
-                                                        class="comment">//获取固定数量线程大小的线程池</span></div><div class="line">         <span
-                                                        class="keyword">final</span> ExecutorService executorService = threadPool.newCustomFixedThreadPool(coordinatorThreadMax);</div><div
-                                                        class="line">         LogUtil.info(LOGGER, <span class="string">"启动协调资源操作线程数量为:&#123;&#125;"</span>, () -&gt; coordinatorThreadMax);</div><div
-                                                        class="line">         <span class="keyword">for</span> (<span
-                                                        class="keyword">int</span> i = <span class="number">0</span>; i &lt; coordinatorThreadMax; i++) &#123;</div><div
-                                                        class="line">            <span
-                                                        class="comment">//执行线程</span></div><div class="line">             executorService.execute(<span
-                                                        class="keyword">new</span> Worker());</div><div class="line">         &#125;</div><div
-                                                        class="line"></div><div class="line">     &#125;</div><div
-                                                        class="line"> &#125;</div><div class="line"> <span
-                                                        class="class"><span class="keyword">class</span> <span
-                                                        class="title">Worker</span> <span
-                                                        class="keyword">implements</span> <span
-                                                        class="title">Runnable</span> </span>&#123;</div><div
-                                                        class="line"></div><div class="line">    <span class="meta">@Override</span></div><div
-                                                        class="line">    <span class="function"><span class="keyword">public</span> <span
-                                                        class="keyword">void</span> <span class="title">run</span><span
-                                                        class="params">()</span> </span>&#123;</div><div class="line">        execute();</div><div
-                                                        class="line">    &#125;</div><div class="line"></div><div
-                                                        class="line">    <span class="function"><span class="keyword">private</span> <span
-                                                        class="keyword">void</span> <span
-                                                        class="title">execute</span><span
-                                                        class="params">()</span> </span>&#123;</div><div class="line">        <span
-                                                        class="keyword">while</span> (<span class="keyword">true</span>) &#123;</div><div
-                                                        class="line">            <span class="keyword">try</span> &#123;</div><div
-                                                        class="line">               <span
-                                                        class="comment">//阻塞队列获取</span></div><div class="line">                <span
-                                                        class="keyword">final</span> CoordinatorAction coordinatorAction = QUEUE.take();</div><div
-                                                        class="line">                <span class="keyword">if</span> (coordinatorAction != <span
-                                                        class="keyword">null</span>) &#123;</div><div class="line">                    <span
-                                                        class="keyword">final</span> <span class="keyword">int</span> code = coordinatorAction.getAction().getCode();</div><div
-                                                        class="line">                    <span class="keyword">if</span> (CoordinatorActionEnum.SAVE.getCode() == code) &#123;</div><div
-                                                        class="line">                        save(coordinatorAction.getTccTransaction());</div><div
-                                                        class="line">                    &#125; <span class="keyword">else</span> <span
-                                                        class="keyword">if</span> (CoordinatorActionEnum.DELETE.getCode() == code) &#123;</div><div
-                                                        class="line">                        remove(coordinatorAction.getTccTransaction().getTransId());</div><div
-                                                        class="line">                    &#125; <span class="keyword">else</span> <span
-                                                        class="keyword">if</span> (CoordinatorActionEnum.UPDATE.getCode() == code) &#123;</div><div
-                                                        class="line">                        update(coordinatorAction.getTccTransaction());</div><div
-                                                        class="line">                    &#125;</div><div class="line">                &#125;</div><div
-                                                        class="line">            &#125; <span
-                                                        class="keyword">catch</span> (Exception e) &#123;</div><div
-                                                        class="line">                e.printStackTrace();</div><div
-                                                        class="line">                LogUtil.error(LOGGER, <span
-                                                        class="string">"执行协调命令失败：&#123;&#125;"</span>, e::getMessage);</div><div
-                                                        class="line">            &#125;</div><div class="line">        &#125;</div><div
-                                                        class="line"></div><div class="line">    &#125;</div><div
-                                                        class="line">&#125;</div></pre>
-                                            </td>
-                                        </tr>
-                                    </table>
-                                </figure>
-                            </li>
-                            <li><p><strong>scheduledRollBack()</strong> 执行定时补偿，这个以后再详细讲解逻辑</p>
+
+                            <li><p><strong>小结</strong>本文讲述了spring声明式事务的实现，以及自定义事务管理器如何接管spring的事务管理器</p>
+                                <p><strong>注意</strong>当前还没涉及到分布式事务具体实现</p>
                             </li>
                         </ul>
-                        <h3 id="到此tcc框架的初始化就已经完成的启动，是不是很简单？如有任何问题或者建议欢迎加入QQ群：162614487-进行讨论"><a
-                                href="#到此tcc框架的初始化就已经完成的启动，是不是很简单？如有任何问题或者建议欢迎加入QQ群：162614487-进行讨论" class="headerlink"
-                                title="到此tcc框架的初始化就已经完成的启动，是不是很简单？如有任何问题或者建议欢迎加入QQ群：162614487 进行讨论"></a>到此tcc框架的初始化就已经完成的启动，是不是很简单？如有任何问题或者建议欢迎加入QQ群：162614487
-                            进行讨论</h3></div>
+                       </div>
                     <div class="tags"></div>
-                    <div class="post-nav"><a href="/2018/08/04/base/two/" class="pre">meepo源码解析系列(四)之项目实战</a><a
-                            href="/2018/08/01/start/two/" class="next">meepo源码解析系列(二)之环境搭建</a></div>
+                    <div class="post-nav"><a href="#" class="pre">meepo源码解析系列(五)之项目实战</a><a
+                            href="/2018/08/01/base/one/" class="next">meepo源码解析系列(三)之环境搭建</a></div>
                 </div>
             </div>
         </div>
@@ -253,22 +120,20 @@
                     <ul class="post-list">
                         <li class="post-list-item"><a class="post-list-link" href="/2018/08/01/start/two/">meepo源码解析系列(二)之环境搭建</a>
                         </li>
-                        <li class="post-list-item"><a class="post-list-link" href="/2018/08/14/tx/tx-seven/">meepo源码解析系列之transaction-admin
-                            事务跟踪查看管理后台</a></li>
                         <li class="post-list-item"><a class="post-list-link" href="/2018/08/01/start/one/">meepo源码解析系列(一)之项目结构</a>
                         </li>
                         <li class="post-list-item"><a class="post-list-link" href="/2018/08/04/base/one/">meepo源码解析系列(三)之框架架构</a>
                         </li>
-                        <li class="post-list-item"><a class="post-list-link" href="/2018/08/04/base/tcc-five/">meepo源码解析系列(五)之项目实战</a>
-                        </li>
+                        <!--<li class="post-list-item"><a class="post-list-link" href="/2018/08/04/base/tcc-five/">meepo源码解析系列(五)之项目实战</a>-->
+                        <!--</li>-->
                         <li class="post-list-item"><a class="post-list-link" href="/2018/08/04/base/two/">meepo源码解析系列(四)之项目实战</a>
                         </li>
-                        <li class="post-list-item"><a class="post-list-link" href="/2018/08/04/base/one/">meepo源码解析系列(三)之启动详解</a>
-                        </li>
-                        <li class="post-list-item"><a class="post-list-link" href="/2018/08/01/start/two/">meepo源码解析系列(二)之环境搭建</a>
-                        </li>
-                        <li class="post-list-item"><a class="post-list-link" href="/2018/08/01/start/one/">meepo源码解析系列(一)之项目结构</a>
-                        </li>
+                        <!--<li class="post-list-item"><a class="post-list-link" href="/2018/08/04/base/one/">meepo源码解析系列(三)之启动详解</a>-->
+                        <!--</li>-->
+                        <!--<li class="post-list-item"><a class="post-list-link" href="/2018/08/01/start/two/">meepo源码解析系列(二)之环境搭建</a>-->
+                        <!--</li>-->
+                        <!--<li class="post-list-item"><a class="post-list-link" href="/2018/08/01/start/one/">meepo源码解析系列(一)之项目结构</a>-->
+                        <!--</li>-->
                     </ul>
                 </div>
                 <div class="widget">
