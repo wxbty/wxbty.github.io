@@ -2,9 +2,7 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="e3af3b7e-5210-43a7-b906-aad60faab4ad" name="Default" comment="">
-      <change beforePath="$PROJECT_DIR$/2018/08/01/start/one/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/2018/08/01/start/one/index.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/2018/08/01/start/two/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/2018/08/01/start/two/index.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/2018/08/04/base/one/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/2018/08/04/base/one/index.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/2018/08/04/base/two/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/2018/08/04/base/two/index.html" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="TRACKING_ENABLED" value="true" />
@@ -15,10 +13,10 @@
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file leaf-file-name="index.html" pinned="false" current-in-tab="true">
+      <file leaf-file-name="index.html" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/2018/08/04/base/one/index.html">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="251">
+            <state relative-caret-position="235">
               <caret line="112" column="125" selection-start-line="112" selection-start-column="125" selection-end-line="112" selection-end-column="125" />
             </state>
           </provider>
@@ -34,8 +32,8 @@
       <file leaf-file-name="index.html" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/2018/08/01/start/one/index.html">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="272">
-              <caret line="110" column="24" lean-forward="true" selection-start-line="110" selection-start-column="24" selection-end-line="111" selection-end-column="29" />
+            <state relative-caret-position="255">
+              <caret line="110" column="25" selection-start-line="110" selection-start-column="24" selection-end-line="111" selection-end-column="29" />
             </state>
           </provider>
         </entry>
@@ -49,11 +47,11 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="index.html" pinned="false" current-in-tab="false">
+      <file leaf-file-name="index.html" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/2018/08/04/base/two/index.html">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="-109">
-              <caret line="87" column="63" selection-start-line="87" selection-start-column="63" selection-end-line="87" selection-end-column="63" />
+            <state relative-caret-position="293">
+              <caret line="36" column="25" lean-forward="true" selection-start-line="36" selection-start-column="25" selection-end-line="36" selection-end-column="25" />
             </state>
           </provider>
         </entry>
@@ -75,6 +73,8 @@
       <find>/2018/08/14/tx/tx-two/</find>
       <find>/2018/08/13/tcc/tcc-seven/</find>
       <find>meepo源码解析系列之tcc-admin事务管理后台</find>
+      <find>自带</find>
+      <find>归档</find>
     </findStrings>
     <replaceStrings>
       <replace>meepo源码</replace>
@@ -102,10 +102,10 @@
         <option value="$PROJECT_DIR$/2018/08/01/meepo/two/index.html" />
         <option value="$PROJECT_DIR$/2018/08/04/base/tcc-five/index.html" />
         <option value="$PROJECT_DIR$/2018/08/04/base/tcc-four/index.html" />
-        <option value="$PROJECT_DIR$/2018/08/04/base/two/index.html" />
         <option value="$PROJECT_DIR$/2018/08/01/start/one/index.html" />
         <option value="$PROJECT_DIR$/2018/08/01/start/two/index.html" />
         <option value="$PROJECT_DIR$/2018/08/04/base/one/index.html" />
+        <option value="$PROJECT_DIR$/2018/08/04/base/two/index.html" />
       </list>
     </option>
   </component>
@@ -121,9 +121,9 @@
       <path value="$PROJECT_DIR$/themes/landscape/package.json" />
     </packageJsonPaths>
   </component>
-  <component name="ProjectFrameBounds">
-    <option name="x" value="33" />
-    <option name="y" value="-832" />
+  <component name="ProjectFrameBounds" extendedState="1">
+    <option name="x" value="23" />
+    <option name="y" value="70" />
     <option name="width" value="1360" />
     <option name="height" value="776" />
   </component>
@@ -334,16 +334,15 @@
       <workItem from="1533191180045" duration="19000" />
       <workItem from="1533193156689" duration="1305000" />
       <workItem from="1533275212748" duration="151000" />
-      <workItem from="1533295824351" duration="24631000" />
+      <workItem from="1533295824351" duration="25988000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="34915000" />
+    <option name="totallyTimeSpent" value="36272000" />
   </component>
   <component name="ToolWindowManager">
-    <frame x="33" y="-832" width="1360" height="776" extended-state="0" />
-    <editor active="true" />
+    <frame x="23" y="70" width="1360" height="776" extended-state="1" />
     <layout>
       <window_info anchor="right" id="Palette" order="3" />
       <window_info anchor="bottom" id="TODO" order="6" />
@@ -478,11 +477,9 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/2018/08/01/start/one/index.html">
+    <entry file="file://$PROJECT_DIR$/2018/08/04/base/tcc-five/index.html">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="272">
-          <caret line="110" column="24" lean-forward="true" selection-start-line="110" selection-start-column="24" selection-end-line="111" selection-end-column="29" />
-        </state>
+        <state relative-caret-position="-5150" />
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/2018/08/01/start/two/index.html">
@@ -492,22 +489,24 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/2018/08/04/base/tcc-five/index.html">
+    <entry file="file://$PROJECT_DIR$/2018/08/01/start/one/index.html">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-5150" />
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/2018/08/04/base/two/index.html">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-109">
-          <caret line="87" column="63" selection-start-line="87" selection-start-column="63" selection-end-line="87" selection-end-column="63" />
+        <state relative-caret-position="255">
+          <caret line="110" column="25" selection-start-line="110" selection-start-column="24" selection-end-line="111" selection-end-column="29" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/2018/08/04/base/one/index.html">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="251">
+        <state relative-caret-position="235">
           <caret line="112" column="125" selection-start-line="112" selection-start-column="125" selection-end-line="112" selection-end-column="125" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/2018/08/04/base/two/index.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="293">
+          <caret line="36" column="25" lean-forward="true" selection-start-line="36" selection-start-column="25" selection-end-line="36" selection-end-column="25" />
         </state>
       </provider>
     </entry>
