@@ -53,49 +53,47 @@
                                 <p>再看一下JTA深度历险的begin流程</p>
                                 <p><img src="https://wxbty.github.io/images/meepo/jta1.png" alt="doBegin"></p>
                                 <p>对比后，我们可以看到，meepo/byteJta多了一些内容，原因是JTA深度历险中的是JTA规范的原型代码，是必须的要有的步骤，实际实现中还需要考虑更多。</p>
-                                <p>如transactionContext实例，作用是序列化后放入dubbo或者springcloud其他服务的上下文，这样分支服务可以意识到全局事务的存在</p>
-                                <p>设置事务的过期时间，是因为meepo中有定时work对超期的事务进行清理</p>
+                                <p>如上下文<strong>transactionContext实例</strong>，作用是序列化后放入dubbo或者springcloud其他服务的上下文，这样分支服务可以意识到全局事务的存在</p>
+                                <p>设置事务的<strong>过期时间</strong>，是因为meepo中有定时work对超期的事务进行清理</p>
                                 <p>this.associateThread(transaction);
                                     把事务绑定到一个单例的map里，为什么不直接用原型中的ThreadLocal呢？因为事务的故障恢复、异步处理等场景需要按线程检索事务实例，使用map会更方便</p>
                                 <p>注：后面的Transaction接口（不清楚再看一下深度历险）上没有定义 begin 方法，原因：Transaction
-                                    对象本身就代表了一个事务，在它被创建的时候就表明事务已经开始，因此也就不需要额外定义 begin() 方法了。</p>
+                                    对象本身就代表了一个事务，在它被创建的时候就表明事务已经开始，因此也就不需要额外定义 begin方法了。</p>
                             </li>
                         </ul>
                         <ul>
-                            <li><strong>第二步：执行业务</strong></li>
-                            <li>
+                            <li><p><strong>第二步：执行业务</strong><p>
                                 <p>业务分本地业务和远程业务，byteJta的sample如下</p>
                                 <p><img src="https://wxbty.github.io/images/meepo/demo1.png" alt="demo"></p>
                                 <p>无论本地还是远程业务，在JTA规范里，都属于resource，通过enlistResource加入到全局事务管理中</p>
                                 <p>接下来我们跟踪本地方法 this.increaseAmount(targetAcctId, amount);</p>
                                 <p>只有一句代码：int value = this.jdbcTemplate.update("update tb_account_two set amount =
                                     amount + "+amount+" where acct_id ='"+acctId+"'");调试进入</p>
-                                <p><img src="https://wxbty.github.io/images/meepo/jdbcT1.png" alt="demo"></p>
+                                <p><img src="https://wxbty.github.io/images/meepo/jdbcT1.png" alt="jdbcTemplate-update"></p>
                                 <p>update方法里有一个内部类，在最后excute中传入了一个它的实例，显然，这是一种回调做法。这里讲一下jdbcTemplate的回调思想，因为比较经典</p>
                                 <p>现在假设我们自己写一个类似jdbcTemplate，封装jdbc的模块</p>
                                 <p>
                                     使用过JDBC的同学都知道资源用完之后要马上释放，否则会资源泄漏。数据库连接的资源我们可以在最后进行释放，比较麻烦的是statement和ResultSet的释放，一开始我的设想是写一个类似如下的函数</p>
-                                <p>现在假设我们自己写一个类似jdbcTemplate，封装jdbc的模块</p>
-                                <p><img src="https://wxbty.github.io/images/meepo/jdbcT2.png" alt="demo"></p>
+                                <p><img src="https://wxbty.github.io/images/meepo/jdbcT2.png" alt="错误demo"></p>
                                 <p>
                                     但是这样做有很大问题，比如statement和ResultSet都没有释放，ResultSet还可以指望好心的用户调用一下close()方法释放，但是statement呢？于是后来又想到下面这个方法：</p>
-                                <p><img src="https://wxbty.github.io/images/meepo/jdbcT3.png" alt="demo"></p>
+                                <p><img src="https://wxbty.github.io/images/meepo/jdbcT3.png" alt="错误demo"></p>
                                 <p>这样做虽然把资源释放了，但是却让代码的耦合度更高了。这个query函数是把结果写入文件，那么假如用户还需要把结果保存到某个对象中该怎么办呢？
                                     那就只好再写一个类似的函数，大部分代码都是重复的，只是while部分的代码会变。虽然也可以把这部分代码抽取出来作为另外一个函数，但是一旦有
                                     新的对ResultSet的操作加入进来，这个类文件势必要更改，明显不满足开闭原则。</p>
                                 <p>看一下jdbcTemplate的代码</p>
-                                <p><img src="https://wxbty.github.io/images/meepo/jdbcT4.png" alt="demo"></p>
+                                <p><img src="https://wxbty.github.io/images/meepo/jdbcT4.png" alt="jdbcTemplate-query"></p>
                                 <p>再写一个简单的回调例子</p>
-                                <p><img src="https://wxbty.github.io/images/meepo/jdbcT5.png" alt="demo"></p>
+                                <p><img src="https://wxbty.github.io/images/meepo/jdbcT5.png" alt="callback-demop"></p>
                                 <p>在我这个项目中，获取到数据库的查询结果之后需要马上处理(因为要释放资源嘛)，但又不知道具体要怎么处理，
                                     这时候也是用回调机制可以很好地解决问题。总结一下就是，如果我写一个API去获取某些数据，获取到之后要把数据给用户去做具体操作，
                                     同时用户操作完之后控制权还要回到我的手中，那么回调机制是很好的解决方案。另外，AOP也是同样的思想，用户自定义在切入点前后需要被
                                     执行的回调函数，然后框架会帮我们去调这些函数，从而实现如事务管理等功能</p>
                                 <p>继续跟踪update</p>
-                                <p><img src="https://wxbty.github.io/images/meepo/jdbcT6.png" alt="demo"></p>
+                                <p><img src="https://wxbty.github.io/images/meepo/jdbcT6.png" alt="jdbcTemplate-update"></p>
                                 <p>
                                     根据meepo-test的数据源配置，经过几个步骤后，进入dbcp2的DataSourceXAConnectionFactory类的createConnection方法</p>
-                                <p><img src="https://wxbty.github.io/images/meepo/dbcp1.png" alt="demo"></p>
+                                <p><img src="https://wxbty.github.io/images/meepo/dbcp1.png" alt="createConnection"></p>
                                 <p>在获取connection和datasource的时候，使用动态代理获得了增强的实现类，作用后文会讲到,继续跟踪getConnection方法</p>
                                 <p><img src="https://wxbty.github.io/images/meepo/dbcp4.png" alt="获取连接"></p>
                                 <p>重点关注下ManagedConnection类，根据注释，这是一个dbcp2连接池获取connection的类</p>
