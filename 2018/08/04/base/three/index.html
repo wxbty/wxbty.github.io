@@ -38,15 +38,13 @@
                             title="这一篇，我们将根据业务时序图，来跟踪代码！"></a>这一篇，我们将根据业务时序图，来跟踪代码！
                     </h4>
                         <ul>
-                            <li>我们发起 <strong>accountService.payment(accountDTO);</strong>
-                                的调用，在提供方，我们可以看到其实现类为AccountServiceImpl:
-                                <p><img src="https://wxbty.github.io/images/meepo/gts.png" alt="结构图"></p>
+                            <li>先回顾下meepo正常提交的时序图
+                                <p><img src="https://wxbty.github.io/images/meepo/meepo.png" alt="结构图"></p>
                             </li>
                         </ul>
                         <ul>
-                            <li><p>1、事务发起方向TxManager发起创建事务组操作</p>
-                            </li>
-                            <li><p>事务发起方也就是客户端，在我们的前面的test过程中，就是meep-test服务</p>
+                            <li><p><strong>第一步：事务发起方向TxManager发起创建事务组操作</strong></p><
+                                <p>事务发起方也就是客户端，在我们的前面的test过程中，就是meep-test服务</p>
                                 <p>TxManager就是上篇提到的JtaTransactionManager类</p>
                                 <p>创建事务组指向上篇提到的doBegin方法，调用路径如下</p>
                                 <p>
@@ -59,131 +57,37 @@
                                 <p>设置事务的过期时间，是因为meepo中有定时work对超期的事务进行清理</p>
                                 <p>this.associateThread(transaction);
                                     把事务绑定到一个单例的map里，为什么不直接用原型中的ThreadLocal呢？因为事务的故障恢复、异步处理等场景需要按线程检索事务实例，使用map会更方便</p>
-
+                                <p>注：后面的Transaction接口（不清楚再看一下深度历险）上没有定义 begin 方法，原因：Transaction
+                                    对象本身就代表了一个事务，在它被创建的时候就表明事务已经开始，因此也就不需要额外定义 begin() 方法了。</p>
                             </li>
                         </ul>
-                        <figure class="highlight java">
-                            <table>
-                                <tr>
-                                    <td class="gutter">
-                                        <pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div
-                                                class="line">4</div><div class="line">5</div><div class="line">6</div><div
-                                                class="line">7</div><div class="line">8</div><div class="line">9</div><div
-                                                class="line">10</div><div class="line">11</div><div
-                                                class="line">12</div><div class="line">13</div></pre>
-                                    </td>
-                                    <td class="code">
-                                        <pre><div class="line"><span class="meta">@Override</span></div><div
-                                                class="line">   <span class="function"><span
-                                                class="keyword">public</span> Class <span class="title">factoryOf</span><span
-                                                class="params">(TccTransactionContext context)</span> <span
-                                                class="keyword">throws</span> Throwable </span>&#123;</div><div
-                                                class="line"></div><div class="line">       <span class="comment">//如果事务还没开启或者 tcc事务上下文是空， 那么应该进入发起调用</span></div><div
-                                                class="line">       <span class="keyword">if</span> (!tccTransactionManager.isBegin() &amp;&amp; Objects.isNull(context)) &#123;</div><div
-                                                class="line">           <span class="keyword">return</span> StartTccTransactionHandler.class;</div><div
-                                                class="line">       &#125; <span class="keyword">else</span> <span
-                                                class="keyword">if</span> (tccTransactionManager.isBegin() &amp;&amp; Objects.isNull(context)) &#123;</div><div
-                                                class="line">           <span class="keyword">return</span> ConsumeTccTransactionIHandler.class;</div><div
-                                                class="line">       &#125; <span class="keyword">else</span> <span
-                                                class="keyword">if</span> (Objects.nonNull(context)) &#123;</div><div
-                                                class="line">           <span class="keyword">return</span> ProviderTccTransactionHandler.class;</div><div
-                                                class="line">       &#125;</div><div class="line">       <span
-                                                class="keyword">return</span> ConsumeTccTransactionIHandler.class;</div><div
-                                                class="line">   &#125;</div></pre>
-                                    </td>
-                                </tr>
-                            </table>
-                        </figure>
                         <ul>
-                            <li>最终我们来到 <strong>ProviderTccTransactionHandler.handler</strong> 方法：</li>
+                            <li><strong>第二步：执行业务</strong></li>
                         </ul>
-                        <figure class="highlight java">
-                            <table>
-                                <tr>
-                                    <td class="gutter">
-                                        <pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div
-                                                class="line">4</div><div class="line">5</div><div class="line">6</div><div
-                                                class="line">7</div><div class="line">8</div><div class="line">9</div><div
-                                                class="line">10</div><div class="line">11</div><div
-                                                class="line">12</div><div class="line">13</div><div
-                                                class="line">14</div><div class="line">15</div><div
-                                                class="line">16</div><div class="line">17</div><div
-                                                class="line">18</div><div class="line">19</div><div
-                                                class="line">20</div><div class="line">21</div><div
-                                                class="line">22</div><div class="line">23</div><div
-                                                class="line">24</div><div class="line">25</div><div
-                                                class="line">26</div><div class="line">27</div><div
-                                                class="line">28</div><div class="line">29</div><div
-                                                class="line">30</div><div class="line">31</div><div
-                                                class="line">32</div><div class="line">33</div><div
-                                                class="line">34</div><div class="line">35</div><div
-                                                class="line">36</div><div class="line">37</div><div
-                                                class="line">38</div><div class="line">39</div><div
-                                                class="line">40</div><div class="line">41</div><div
-                                                class="line">42</div><div class="line">43</div><div
-                                                class="line">44</div></pre>
-                                    </td>
-                                    <td class="code">
-                                        <pre><div class="line"><span class="comment">/**</span></div><div
-                                                class="line"><span class="comment">    * 分布式事务提供者处理接口</span></div><div
-                                                class="line"><span
-                                                class="comment">    * 根据tcc事务上下文的状态来执行相对应的方法</span></div><div
-                                                class="line"><span class="comment">    *</span></div><div
-                                                class="line"><span class="comment">    * <span
-                                                class="doctag">@param</span> point   point 切点</span></div><div
-                                                class="line"><span class="comment">    * <span
-                                                class="doctag">@param</span> context context</span></div><div
-                                                class="line"><span class="comment">    * <span
-                                                class="doctag">@return</span> Object</span></div><div class="line"><span
-                                                class="comment">    * <span
-                                                class="doctag">@throws</span> Throwable 异常</span></div><div
-                                                class="line"><span class="comment">    */</span></div><div class="line">   <span
-                                                class="meta">@Override</span></div><div class="line">   <span
-                                                class="function"><span class="keyword">public</span> Object <span
-                                                class="title">handler</span><span class="params">(ProceedingJoinPoint point, TccTransactionContext context)</span> <span
-                                                class="keyword">throws</span> Throwable </span>&#123;</div><div
-                                                class="line">       TccTransaction tccTransaction = <span
-                                                class="keyword">null</span>;</div><div class="line">       <span
-                                                class="keyword">try</span> &#123;</div><div
-                                                class="line">           <span class="keyword">switch</span> (TccActionEnum.acquireByCode(context.getAction())) &#123;</div><div
-                                                class="line">               <span
-                                                class="keyword">case</span> TRYING:</div><div class="line">                   <span
-                                                class="keyword">try</span> &#123;</div><div class="line">                       <span
-                                                class="comment">//创建事务信息</span></div><div class="line">                       tccTransaction = tccTransactionManager.providerBegin(context);</div><div
-                                                class="line">                       <span
-                                                class="comment">//发起方法调用</span></div><div class="line">                       <span
-                                                class="keyword">return</span> point.proceed();</div><div class="line">                   &#125; <span
-                                                class="keyword">catch</span> (Throwable throwable) &#123;</div><div
-                                                class="line">                       tccTransactionManager.removeTccTransaction(tccTransaction);</div><div
-                                                class="line">                       <span class="keyword">throw</span> throwable;</div><div
-                                                class="line"></div><div class="line">                   &#125;</div><div
-                                                class="line">               <span class="keyword">case</span> CONFIRMING:</div><div
-                                                class="line">                   <span class="comment">//如果是confirm 通过之前保存的事务信息 进行反射调用</span></div><div
-                                                class="line">                   <span class="keyword">final</span> TccTransaction acquire = tccTransactionManager.acquire(context);</div><div
-                                                class="line">                   tccTransactionManager.confirm();</div><div
-                                                class="line">                   <span
-                                                class="keyword">break</span>;</div><div
-                                                class="line">               <span class="keyword">case</span> CANCELING:</div><div
-                                                class="line">                   <span class="comment">//如果是调用CANCELING 通过之前保存的事务信息 进行反射调用</span></div><div
-                                                class="line">                   tccTransactionManager.acquire(context);</div><div
-                                                class="line">                   tccTransactionManager.cancel();</div><div
-                                                class="line">                   <span
-                                                class="keyword">break</span>;</div><div
-                                                class="line">               <span class="keyword">default</span>:</div><div
-                                                class="line">                   <span
-                                                class="keyword">break</span>;</div><div
-                                                class="line">           &#125;</div><div
-                                                class="line">       &#125; <span
-                                                class="keyword">finally</span> &#123;</div><div class="line">           tccTransactionManager.remove();</div><div
-                                                class="line">       &#125;</div><div class="line">       Method method = ((MethodSignature) (point.getSignature())).getMethod();</div><div
-                                                class="line">       <span class="keyword">return</span> getDefaultValue(method.getReturnType());</div><div
-                                                class="line">   &#125;</div></pre>
-                                    </td>
-                                </tr>
-                            </table>
-                        </figure>
                         <ul>
-                            <li><strong>TccTransactionContext</strong> 就是通过rpc json序列化后传过来的对象，此时我们知道是在try阶段，所以我们进入try
+                            <li>
+                                <p>业务分本地业务和远程业务，byteJta的sample如下</p>
+                                <p><img src="https://wxbty.github.io/images/meepo/demo1.png" alt="demo"></p>
+                                <p>无论本地还是远程业务，在JTA规范里，都属于resource，通过enlistResource加入到全局事务管理中</p>
+                                <p>接下来我们跟踪本地方法 this.increaseAmount(targetAcctId, amount);</p>
+                                <p>只有一句代码：int value = this.jdbcTemplate.update("update tb_account_two set amount =
+                                    amount + "+amount+" where acct_id ='"+acctId+"'");</p>
+                                <p><img src="https://wxbty.github.io/images/meepo/jdbcT1.png" alt="demo"></p>
+                                <p>虽然和分布式事务无关，这里讲一下jdbcTemplate的实现，因为spring的代码总是这么经典</p>
+                                <p>现在假设我们自己写一个类似jdbcTemplate，封装jdbc的模块</p>
+                                <p>
+                                    使用过JDBC的同学都知道资源用完之后要马上释放，否则会资源泄漏。数据库连接的资源我们可以在最后进行释放，比较麻烦的是statement和ResultSet的释放，一开始我的设想是写一个类似如下的函数</p>
+                                <p>现在假设我们自己写一个类似jdbcTemplate，封装jdbc的模块</p>
+                                <pre class="brush:java;toolbar: true; auto-links: false;"><code>//&nbsp;错误方案一
+                                        public&nbsp;ResultSet&nbsp;query(String&nbsp;sql)&nbsp;{
+                                        &nbsp;&nbsp;&nbsp;&nbsp;connection&nbsp;=&nbsp;getConnection();
+                                        &nbsp;&nbsp;&nbsp;&nbsp;statement&nbsp;=&nbsp;connection.prepareStatement(sql);
+                                        &nbsp;&nbsp;&nbsp;&nbsp;ResultSet&nbsp;rs&nbsp;=&nbsp;statement.executeQuery(sql);
+                                        &nbsp;&nbsp;&nbsp;&nbsp;
+                                        &nbsp;&nbsp;&nbsp;&nbsp;return&nbsp;rs;
+                                    }</code></pre>
+
+
                             </li>
                         </ul>
                         <figure class="highlight java">
