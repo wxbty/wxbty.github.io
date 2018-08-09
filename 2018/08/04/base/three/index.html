@@ -73,12 +73,12 @@
                                 <p>只有一句代码：int value = this.jdbcTemplate.update("update tb_account_two set amount =
                                     amount + "+amount+" where acct_id ='"+acctId+"'");</p>
                                 <p><img src="https://wxbty.github.io/images/meepo/jdbcT1.png" alt="demo"></p>
-                                <p>虽然和分布式事务无关，这里讲一下jdbcTemplate的实现，因为spring的代码总是这么经典</p>
+                                <p>虽然和分布式事务无关，这里讲一下jdbcTemplate的回调思想，比较经典</p>
                                 <p>现在假设我们自己写一个类似jdbcTemplate，封装jdbc的模块</p>
                                 <p>
                                     使用过JDBC的同学都知道资源用完之后要马上释放，否则会资源泄漏。数据库连接的资源我们可以在最后进行释放，比较麻烦的是statement和ResultSet的释放，一开始我的设想是写一个类似如下的函数</p>
                                 <p>现在假设我们自己写一个类似jdbcTemplate，封装jdbc的模块</p>
-                                <pre class="brush:java;toolbar: true; auto-links: false;"><code>//&nbsp;错误方案一
+                                <pre><code>//&nbsp;错误方案一
                                         public&nbsp;ResultSet&nbsp;query(String&nbsp;sql)&nbsp;{
                                         &nbsp;&nbsp;&nbsp;&nbsp;connection&nbsp;=&nbsp;getConnection();
                                         &nbsp;&nbsp;&nbsp;&nbsp;statement&nbsp;=&nbsp;connection.prepareStatement(sql);
