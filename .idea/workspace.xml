@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="e3af3b7e-5210-43a7-b906-aad60faab4ad" name="Default" comment="" />
+    <list default="true" id="e3af3b7e-5210-43a7-b906-aad60faab4ad" name="Default" comment="">
+      <change beforePath="$PROJECT_DIR$/2018/08/04/base/three/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/2018/08/04/base/three/index.html" afterDir="false" />
+    </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="TRACKING_ENABLED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -23,8 +25,8 @@
       <file leaf-file-name="index.html" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/2018/08/04/base/three/index.html">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="166">
-              <caret line="80" column="36" selection-start-line="80" selection-start-column="36" selection-end-line="80" selection-end-column="36" />
+            <state relative-caret-position="190">
+              <caret line="89" column="32" selection-start-line="89" selection-start-column="32" selection-end-line="89" selection-end-column="32" />
             </state>
           </provider>
         </entry>
@@ -327,12 +329,12 @@
       <workItem from="1533275212748" duration="151000" />
       <workItem from="1533295824351" duration="25988000" />
       <workItem from="1533452333948" duration="1062000" />
-      <workItem from="1533733726904" duration="8970000" />
+      <workItem from="1533733726904" duration="9535000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="46304000" />
+    <option name="totallyTimeSpent" value="46869000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="0" y="30" width="1360" height="776" extended-state="0" />
@@ -551,8 +553,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/2018/08/04/base/three/index.html">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="166">
-          <caret line="80" column="36" selection-start-line="80" selection-start-column="36" selection-end-line="80" selection-end-column="36" />
+        <state relative-caret-position="190">
+          <caret line="89" column="32" selection-start-line="89" selection-start-column="32" selection-end-line="89" selection-end-column="32" />
         </state>
       </provider>
     </entry>

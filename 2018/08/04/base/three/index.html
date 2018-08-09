@@ -78,14 +78,21 @@
                                 <p>
                                     使用过JDBC的同学都知道资源用完之后要马上释放，否则会资源泄漏。数据库连接的资源我们可以在最后进行释放，比较麻烦的是statement和ResultSet的释放，一开始我的设想是写一个类似如下的函数</p>
                                 <p>现在假设我们自己写一个类似jdbcTemplate，封装jdbc的模块</p>
-                                <pre><code>
-                                        public&nbsp;ResultSet&nbsp;query(String&nbsp;sql)&nbsp;{
-                                        &nbsp;&nbsp;&nbsp;&nbsp;connection&nbsp;=&nbsp;getConnection();
-                                        &nbsp;&nbsp;&nbsp;&nbsp;statement&nbsp;=&nbsp;connection.prepareStatement(sql);
-                                        &nbsp;&nbsp;&nbsp;&nbsp;ResultSet&nbsp;rs&nbsp;=&nbsp;statement.executeQuery(sql);
-                                        &nbsp;&nbsp;&nbsp;&nbsp;
-                                        &nbsp;&nbsp;&nbsp;&nbsp;return&nbsp;rs;
-                                    }</code></pre>
+                                <p><img src="https://wxbty.github.io/images/meepo/jdbcT2.png" alt="demo"></p>
+                                <p>
+                                    但是这样做有很大问题，比如statement和ResultSet都没有释放，ResultSet还可以指望好心的用户调用一下close()方法释放，但是statement呢？于是后来又想到下面这个方法：</p>
+                                <p><img src="https://wxbty.github.io/images/meepo/jdbcT3.png" alt="demo"></p>
+                                <p>这样做虽然把资源释放了，但是却让代码的耦合度更高了。这个query函数是把结果写入文件，那么假如用户还需要把结果保存到某个对象中该怎么办呢？
+                                    那就只好再写一个类似的函数，大部分代码都是重复的，只是while部分的代码会变。虽然也可以把这部分代码抽取出来作为另外一个函数，但是一旦有
+                                    新的对ResultSet的操作加入进来，这个类文件势必要更改，明显不满足开闭原则。</p>
+                                <p>看一下jdbcTemplate的代码</p>
+                                <p><img src="https://wxbty.github.io/images/meepo/jdbcT4.png" alt="demo"></p>
+                                <p>一个简单的回调例子</p>
+                                <p><img src="https://wxbty.github.io/images/meepo/jdbcT5.png" alt="demo"></p>
+                                <p>在我这个项目中，获取到数据库的查询结果之后需要马上处理(因为要释放资源嘛)，但又不知道具体要怎么处理，
+                                    这时候也是用回调机制可以很好地解决问题。总结一下就是，如果我写一个API去获取某些数据，获取到之后要把数据给用户去做具体操作，
+                                    同时用户操作完之后控制权还要回到我的手中，那么回调机制是很好的解决方案。另外，AOP也是同样的思想，用户自定义在切入点前后需要被
+                                    执行的回调函数，然后框架会帮我们去调这些函数，从而实现如事务管理等功能</p>
 
 
                             </li>
