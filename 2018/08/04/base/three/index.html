@@ -31,105 +31,35 @@
         <div class="pure-u-1 pure-u-md-3-4">
             <div class="content_container">
                 <div class="post"><h1 class="post-title">meepo源码解析系列(五)之项目实战</h1>
-                    <div class="post-meta">Oct 12, 2017<span> | </span><span class="category"><a
+                    <div class="post-meta">Aug 08, 2018<span> | </span><span class="category"><a
                             href="/categories/meepo/">meepo</a></span></div>
-                    <div class="post-content"><h4 id="接上一篇，我们已经分析了在整个消费的调用流程，现在只差发起真实的rpc远端调用了，这篇文章，我们一起进入提供者的调用流程吧！"><a
-                            href="#接上一篇，我们已经分析了在整个消费的调用流程，现在只差发起真实的rpc远端调用了，这篇文章，我们一起进入提供者的调用流程吧！" class="headerlink"
-                            title="接上一篇，我们已经分析了在整个消费的调用流程，现在只差发起真实的rpc远端调用了，这篇文章，我们一起进入提供者的调用流程吧！"></a>接上一篇，我们已经分析了在整个消费的调用流程，现在只差发起真实的rpc远端调用了，这篇文章，我们一起进入提供者的调用流程吧！
+                    <div class="post-content"><h4 id="这一篇，我们将根据业务时序图，来跟踪代码！"><a
+                            href="#这一篇，我们将根据业务时序图，来跟踪代码！" class="headerlink"
+                            title="这一篇，我们将根据业务时序图，来跟踪代码！"></a>这一篇，我们将根据业务时序图，来跟踪代码！
                     </h4>
                         <ul>
                             <li>我们发起 <strong>accountService.payment(accountDTO);</strong>
                                 的调用，在提供方，我们可以看到其实现类为AccountServiceImpl:
+                                <p><img src="https://wxbty.github.io/images/meepo/gts.png" alt="结构图"></p>
                             </li>
                         </ul>
-                        <figure class="highlight java">
-                            <table>
-                                <tr>
-                                    <td class="gutter">
-                                        <pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div
-                                                class="line">4</div><div class="line">5</div><div class="line">6</div><div
-                                                class="line">7</div><div class="line">8</div><div class="line">9</div><div
-                                                class="line">10</div><div class="line">11</div><div
-                                                class="line">12</div><div class="line">13</div><div
-                                                class="line">14</div><div class="line">15</div><div
-                                                class="line">16</div><div class="line">17</div><div
-                                                class="line">18</div><div class="line">19</div><div
-                                                class="line">20</div><div class="line">21</div><div
-                                                class="line">22</div><div class="line">23</div><div
-                                                class="line">24</div><div class="line">25</div><div
-                                                class="line">26</div><div class="line">27</div><div
-                                                class="line">28</div><div class="line">29</div><div
-                                                class="line">30</div><div class="line">31</div><div
-                                                class="line">32</div><div class="line">33</div><div
-                                                class="line">34</div><div class="line">35</div><div
-                                                class="line">36</div><div class="line">37</div><div
-                                                class="line">38</div><div class="line">39</div><div
-                                                class="line">40</div><div class="line">41</div><div
-                                                class="line">42</div><div class="line">43</div></pre>
-                                    </td>
-                                    <td class="code">
-                                        <pre><div class="line"></div><div class="line"><span class="comment">/**</span></div><div
-                                                class="line"><span class="comment">    * 扣款支付</span></div><div
-                                                class="line"><span class="comment">    *</span></div><div
-                                                class="line"><span class="comment">    * <span
-                                                class="doctag">@param</span> accountDTO 参数dto</span></div><div
-                                                class="line"><span class="comment">    * <span
-                                                class="doctag">@return</span> true</span></div><div class="line"><span
-                                                class="comment">    */</span></div><div class="line">   <span
-                                                class="meta">@Override</span></div><div class="line">   <span
-                                                class="meta">@Tcc</span>(confirmMethod = <span
-                                                class="string">"confirm"</span>, cancelMethod = <span class="string">"cancel"</span>)</div><div
-                                                class="line">   <span class="function"><span
-                                                class="keyword">public</span> <span class="keyword">boolean</span> <span
-                                                class="title">payment</span><span
-                                                class="params">(AccountDTO accountDTO)</span> </span>&#123;</div><div
-                                                class="line">       <span class="keyword">final</span> AccountDO accountDO = accountMapper.findByUserId(accountDTO.getUserId());</div><div
-                                                class="line">       accountDO.setBalance(accountDO.getBalance().subtract(accountDTO.getAmount()));</div><div
-                                                class="line">       accountDO.setFreezeAmount(accountDO.getFreezeAmount().add(accountDTO.getAmount()));</div><div
-                                                class="line">       accountDO.setUpdateTime(<span
-                                                class="keyword">new</span> Date());</div><div class="line">       <span
-                                                class="keyword">final</span> <span class="keyword">int</span> update = accountMapper.update(accountDO);</div><div
-                                                class="line">       <span class="keyword">if</span> (update != <span
-                                                class="number">1</span>) &#123;</div><div class="line">           <span
-                                                class="keyword">throw</span> <span class="keyword">new</span> TccRuntimeException(<span
-                                                class="string">"资金不足！"</span>);</div><div
-                                                class="line">       &#125;</div><div class="line">       <span
-                                                class="keyword">return</span> Boolean.TRUE;</div><div class="line">   &#125;</div><div
-                                                class="line"></div><div class="line">   <span class="function"><span
-                                                class="keyword">public</span> <span class="keyword">boolean</span> <span
-                                                class="title">confirm</span><span
-                                                class="params">(AccountDTO accountDTO)</span> </span>&#123;</div><div
-                                                class="line"></div><div class="line">       LOGGER.debug(<span
-                                                class="string">"============执行确认付款接口==============="</span>);</div><div
-                                                class="line"></div><div class="line">       <span
-                                                class="keyword">final</span> AccountDO accountDO = accountMapper.findByUserId(accountDTO.getUserId());</div><div
-                                                class="line">       accountDO.setFreezeAmount(accountDO.getFreezeAmount().subtract(accountDTO.getAmount()));</div><div
-                                                class="line">       accountDO.setUpdateTime(<span
-                                                class="keyword">new</span> Date());</div><div class="line">       accountMapper.update(accountDO);</div><div
-                                                class="line">       <span
-                                                class="keyword">return</span> Boolean.TRUE;</div><div class="line">   &#125;</div><div
-                                                class="line"></div><div class="line"></div><div class="line">   <span
-                                                class="function"><span class="keyword">public</span> <span
-                                                class="keyword">boolean</span> <span class="title">cancel</span><span
-                                                class="params">(AccountDTO accountDTO)</span> </span>&#123;</div><div
-                                                class="line"></div><div class="line">       LOGGER.debug(<span
-                                                class="string">"============执行取消付款接口==============="</span>);</div><div
-                                                class="line">       <span class="keyword">final</span> AccountDO accountDO = accountMapper.findByUserId(accountDTO.getUserId());</div><div
-                                                class="line">       accountDO.setBalance(accountDO.getBalance().add(accountDTO.getAmount()));</div><div
-                                                class="line">       accountDO.setFreezeAmount(accountDO.getFreezeAmount().subtract(accountDTO.getAmount()));</div><div
-                                                class="line">       accountDO.setUpdateTime(<span
-                                                class="keyword">new</span> Date());</div><div class="line">       accountMapper.update(accountDO);</div><div
-                                                class="line">       <span
-                                                class="keyword">return</span> Boolean.TRUE;</div><div class="line">   &#125;</div></pre>
-                                    </td>
-                                </tr>
-                            </table>
-                        </figure>
                         <ul>
-                            <li><p>我们发现它也有@Tcc注解，并且提供了confrim，cancel等真实的方法。通过前面一篇的分析，我们知道，他是springBean的一个实现类，同样会走切面。</p>
+                            <li><p>1、事务发起方向TxManager发起创建事务组操作</p>
                             </li>
-                            <li><p>经过 <strong>TccTransactionFactoryServiceImpl</strong> 的 factoryOf方法，我们可以知道他会返回
-                                <strong>ProviderTccTransactionHandler</strong></p>
+                            <li><p>事务发起方也就是客户端，在我们的前面的test过程中，就是meep-test服务</p>
+                                <p>TxManager就是上篇提到的JtaTransactionManager类</p>
+                                <p>创建事务组指向上篇提到的doBegin方法，调用路径如下</p>
+                                <p>
+                                    JdkDynamicAopProxy.doJtaBegin->UserTransaction.doBegin->transactionManager.begin，最后的begin代码如下</p>
+                                <p><img src="https://wxbty.github.io/images/meepo/begin.png" alt="doBegin"></p>
+                                <p>JTA深度历险的begin流程</p>
+                                <p><img src="https://wxbty.github.io/images/meepo/jta1.png" alt="doBegin"></p>
+                                <p>对比后，我们可以看到，meepo/byteJta多了一些内容，原因是JTA深度历险中的是JTA规范的原型代码，实际实现中还需要考虑更多。</p>
+                                <p>如transactionContext实例，作用是序列化后放入dubbo或者springcloud其他服务的上下文，这样分支服务可以意识到全局事务的存在</p>
+                                <p>设置事务的过期时间，是因为meepo中有定时work对超期的事务进行清理</p>
+                                <p>this.associateThread(transaction);
+                                    把事务绑定到一个单例的map里，为什么不直接用原型中的ThreadLocal呢？因为事务的故障恢复、异步处理等场景需要按线程检索事务实例，使用map会更方便</p>
+
                             </li>
                         </ul>
                         <figure class="highlight java">
@@ -745,7 +675,7 @@
                         </li>
                         <li class="post-list-item"><a class="post-list-link" href="/2018/08/04/base/one/">meepo源码解析系列(三)之框架架构</a>
                         </li>
-                        <li class="post-list-item"><a class="post-list-link" href="/2018/08/04/base/tcc-five/">meepo源码解析系列(五)之项目实战</a>
+                        <li class="post-list-item"><a class="post-list-link" href="/2018/08/04/base/three/">meepo源码解析系列(五)之项目实战</a>
                         </li>
                         <li class="post-list-item"><a class="post-list-link" href="/2018/08/04/base/two/">meepo源码解析系列(四)之项目实战</a>
                         </li>
