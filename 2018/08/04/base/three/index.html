@@ -53,11 +53,11 @@
                                 <p>再看一下JTA深度历险的begin流程</p>
                                 <p><img src="https://wxbty.github.io/images/meepo/jta1.png" alt="doBegin"></p>
                                 <p>对比后，我们可以看到，meepo/byteJta多了一些内容，原因是JTA深度历险中的是JTA规范的原型代码，是必须的要有的步骤，实际实现中还需要考虑更多。</p>
-                                <p>如上下文<strong>transactionContext实例</strong>，作用是序列化后放入dubbo或者springcloud其他服务的上下文，这样分支服务可以意识到全局事务的存在
+                                <p>如上下文<strong>transactionContext实例</strong>，作用是序列化后放入dubbo或者springcloud其他服务的上下文，这样分支服务可以意识到全局事务的存在；
                                 </p>
-                                <p>设置事务的<strong>过期时间</strong>，是因为meepo中有定时work对超期的事务进行清理</p>
+                                <p>设置事务的<strong>过期时间</strong>，是因为meepo中有定时work对超期的事务进行清理；</p>
                                 <p>this.associateThread(transaction);
-                                    把事务绑定到一个单例的map里，为什么不直接用原型中的ThreadLocal呢？因为事务的故障恢复、异步处理等场景需要按线程检索事务实例，使用map会更方便</p>
+                                    把事务绑定到一个单例的map里，为什么不直接用原型中的ThreadLocal呢？因为事务的故障恢复、异步处理等场景需要按线程检索事务实例，使用map会更方便；</p>
                                 <p>注：后面的Transaction接口（不清楚再看一下深度历险）上没有定义 begin 方法，原因：Transaction
                                     对象本身就代表了一个事务，在它被创建的时候就表明事务已经开始，因此也就不需要额外定义 begin方法了。</p>
                             </li>
@@ -92,8 +92,8 @@
                                 <p>在我这个项目中，获取到数据库的查询结果之后需要马上处理(因为要释放资源嘛)，但又不知道具体要怎么处理，
                                     这时候也是用回调机制可以很好地解决问题。总结一下就是，如果我写一个API去获取某些数据，获取到之后要把数据给用户去做具体操作，
                                     同时用户操作完之后控制权还要回到我的手中，那么回调机制是很好的解决方案。另外，AOP也是同样的思想，用户自定义在切入点前后需要被
-                                    执行的回调函数，然后框架会帮我们去调这些函数，从而实现如事务管理等功能</p>
-                                <p>继续跟踪update</p>
+                                    执行的回调函数，然后框架会帮我们去调这些函数，从而实现如事务管理等功能。</p>
+                                <p>回归正题，继续跟踪update代码</p>
                                 <p><img src="https://wxbty.github.io/images/meepo/jdbcT6.png" alt="jdbcTemplate-update">
                                 </p>
                                 <p>
@@ -180,8 +180,6 @@
                         </li>
                         <li class="post-list-item"><a class="post-list-link" href="/2018/08/04/base/two/">meepo源码解析系列(四)之项目实战</a>
                         </li>
-
-
                     </ul>
                 </div>
                 <div class="widget">
