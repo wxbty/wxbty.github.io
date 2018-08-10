@@ -1,11 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="e3af3b7e-5210-43a7-b906-aad60faab4ad" name="Default" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/2018/08/04/base/three/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/2018/08/04/base/three/index.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/2018/08/09/base/one/index.html" beforeDir="false" />
-    </list>
+    <list default="true" id="e3af3b7e-5210-43a7-b906-aad60faab4ad" name="Default" comment="" />
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="TRACKING_ENABLED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -24,7 +20,7 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="index.html" pinned="false" current-in-tab="true">
+      <file leaf-file-name="index.html" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/2018/08/04/base/three/index.html">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="-117">
@@ -60,11 +56,11 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="index.html" pinned="false" current-in-tab="false">
+      <file leaf-file-name="index.html" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/2018/08/04/base/two/index.html">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="1875">
-              <caret line="125" column="29" selection-start-line="125" selection-start-column="29" selection-end-line="125" selection-end-column="29" />
+            <state relative-caret-position="233">
+              <caret line="89" column="72" selection-start-line="89" selection-start-column="72" selection-end-line="89" selection-end-column="72" />
             </state>
           </provider>
         </entry>
@@ -115,12 +111,12 @@
         <option value="$PROJECT_DIR$/2018/08/01/meepo/two/index.html" />
         <option value="$PROJECT_DIR$/2018/08/04/base/tcc-five/index.html" />
         <option value="$PROJECT_DIR$/2018/08/04/base/tcc-four/index.html" />
-        <option value="$PROJECT_DIR$/2018/08/04/base/two/index.html" />
         <option value="$PROJECT_DIR$/2018/08/04/base/one/index.html" />
         <option value="$PROJECT_DIR$/2018/08/01/start/one/index.html" />
         <option value="$PROJECT_DIR$/2018/08/01/start/two/index.html" />
         <option value="$PROJECT_DIR$/2018/08/09/base/one/index.html" />
         <option value="$PROJECT_DIR$/2018/08/04/base/three/index.html" />
+        <option value="$PROJECT_DIR$/2018/08/04/base/two/index.html" />
       </list>
     </option>
   </component>
@@ -136,7 +132,7 @@
       <path value="$PROJECT_DIR$/themes/landscape/package.json" />
     </packageJsonPaths>
   </component>
-  <component name="ProjectFrameBounds" extendedState="1">
+  <component name="ProjectFrameBounds">
     <option name="x" value="21" />
     <option name="y" value="55" />
     <option name="width" value="1360" />
@@ -381,16 +377,15 @@
       <workItem from="1533295824351" duration="25988000" />
       <workItem from="1533452333948" duration="1062000" />
       <workItem from="1533733726904" duration="22517000" />
-      <workItem from="1533870534352" duration="1298000" />
+      <workItem from="1533870534352" duration="1343000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="61149000" />
+    <option name="totallyTimeSpent" value="61194000" />
   </component>
   <component name="ToolWindowManager">
-    <frame x="21" y="55" width="1360" height="776" extended-state="1" />
-    <editor active="true" />
+    <frame x="21" y="55" width="1360" height="776" extended-state="0" />
     <layout>
       <window_info anchor="right" id="Palette" order="3" />
       <window_info anchor="bottom" id="TODO" order="6" />
@@ -402,10 +397,10 @@
       <window_info anchor="bottom" id="Database Changes" order="7" show_stripe_button="false" />
       <window_info anchor="bottom" id="Run" order="2" />
       <window_info anchor="bottom" id="Version Control" order="7" />
-      <window_info anchor="bottom" id="Terminal" order="7" visible="true" weight="0.3292683" />
+      <window_info active="true" anchor="bottom" id="Terminal" order="7" visible="true" weight="0.3292683" />
       <window_info id="Capture Tool" order="2" />
       <window_info id="Designer" order="2" />
-      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.27617604" />
+      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.27617604" />
       <window_info anchor="right" id="Database" order="3" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
       <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
@@ -617,13 +612,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/2018/08/04/base/two/index.html">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1875">
-          <caret line="125" column="29" selection-start-line="125" selection-start-column="29" selection-end-line="125" selection-end-column="29" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/2018/08/04/base/one/index.html">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="1485">
@@ -656,6 +644,13 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="-117">
           <caret line="181" column="29" lean-forward="true" selection-start-line="181" selection-start-column="29" selection-end-line="181" selection-end-column="29" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/2018/08/04/base/two/index.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="233">
+          <caret line="89" column="72" selection-start-line="89" selection-start-column="72" selection-end-line="89" selection-end-column="72" />
         </state>
       </provider>
     </entry>
