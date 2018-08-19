@@ -104,6 +104,7 @@
                                 <p><img src="https://wxbty.github.io/images/meepo/dubbo8.png" alt="Invoker调用链"></p>
                                 <p>关于dubbo的原理流程，有兴趣的读者可以自行研究,这里不再叙述，代码直接跳到filter的Invoker方法,filter属于protocol远程调用层</p>
                                 <p>3、根据分层原理，dubbo的filter执行的时机是：cosumer-filter -> 调用远程服务 ->provider-filter->provider执行业务</p>
+                                <p>首先进入的是consumer的fileter</p>
                                 <p><img src="https://wxbty.github.io/images/meepo/dubbo9.png" alt="Invoker调用链-filter"></p>
                                 <p>进入业务service前的处理，在consumerInvokeForSVC方法中，做了一些初始化bean的工作</p>
                                 <p><img src="https://wxbty.github.io/images/meepo/dubbo11.png" alt="consumerInvokeForSVC"></p>
