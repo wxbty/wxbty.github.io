@@ -35,15 +35,15 @@
                             href="/wxbty/meepo">meepo</a></span></div>
                     <div class="post-content"><h4 id="这一篇，我们将跟踪代码dubbo远程服务执行业务代码！"><a
                             href="#这一篇，我们将跟踪代码dubbo远程服务执行业务代码！" class="headerlink"
-                            title="这一篇，我们将跟踪代码dubbo远程服务执行业务代码！"></a>这一篇，我们将跟踪代码dubbo远程服务执行业务代码！
+                            title="这一篇，我们将跟踪代码dubbo远程服务执行业务代码！"></a>这一篇，我们将跟踪dubbo远程服务执行业务代码！
                     </h4>
                         <ul>
                             <li>
                                 <p>
-                                    在我们的实际业务中，普遍使用了微服务框架，demo里本地sql和dubbo接口需要共享事务的场景非常多，二阶段提交协议比较知名的Atomikos框架，只能处理一个服务+多个数据库源的场景。</p>
+                                    在我们的实际业务中，普遍使用了微服务框架，meepo-test里本地业务sql和dubbo业务接口需要共享事务的场景非常多，二阶段提交协议比较知名的Atomikos框架，只能处理一个服务+多个数据库源的场景，并没有提供微服务场景的实现。</p>
                                 <p>
-                                    那我们怎么处理这种情况呢？其实思路很简单，可以按照JTA的规范来。JTA里的XAResource，并不仅仅是数据库连接，其他连接比如RPC接口、MQ都可以实现XAResource，从而被全局事务管理</p>
-                                <p>在XA/JTA协议的实现里，客户端本地事务里的DML对应一个XAResource。XAResource 是 Distributed Transaction
+                                    那我们怎么处理这种情况呢？其实思路很简单，可以按照JTA的规范来。JTA里的XAResource，并不仅仅是数据库连接，其他连接比如RPC接口、MQ都可以实现XAResource接口，从而被JTA事务管理。</p>
+                                <p>在XA/JTA协议的实现里，客户端本地事务里的一组DML操作，或者一个本地XA连接对应一个XAResource。XAResource 是 Distributed Transaction
                                     Processing: The XA Specification 标准的 Java
                                     实现，它是对底层事务资源的抽象，定义了分布式事务处理过程中事务管理器和资源管理器之间的协议，各事务资源提供商（如 JDBC
                                     驱动，JMS）将提供此接口的实现。使用此接口，开发人员可以通过自己的编程实现分布式事务处理，但这些通常都是由应用服务器实现的（服务器自带实现更加高效，稳定）
@@ -59,18 +59,18 @@
                         </ul>
                         <ul>
                             <li><p><strong>一、dubbo服务实现XAResource</strong></p>
-                                <p>实现XAResource则必须实现XAResource下面的几个方法，如start、end、prepare、commit等方法</p>
-                                <p>但问题是无论是dubbo还是其他微服务，都只有一个业务方法，这种情况下该如何来扩展</p>
-                                <p>再深入了解byteJta或者阿里GTS前，一直觉得，除了接口提供方和接口消费者，还得有一个第三方中间件来协调全局事务，
-                                    因为消费者承担不了这个角色，我们会觉得，在物理上消费者连接不到提供者的数据库，如何来协调事务提交或还原</p>
+                                <p>实现XAResource接口则必须实现XAResource下面的几个方法，如start、end、prepare、commit等方法</p>
+                                <p>但问题是无论是dubbo还是其他微服务，都只有一个业务方法，这种情况该如何来扩展呢？</p>
+                                <p>在深入了解byteJta或者阿里GTS前，一直觉得，除了接口提供方和接口消费者，还得有一个第三方中间件来协调全局事务，
+                                    因为消费者承担不了这个角色。我们有理由这样想，在物理上消费者连接不到提供者的数据库，如何来协调事务提交或回滚</p>
                                 <p>持有这个观点的，除了开始研究时本人和同事的观点。还有下面这位</p>
                                 <p><img src="https://wxbty.github.io/images/meepo/dubbo1.png" alt=""></p>
                                 <p>
-                                    微服务虽然只有一个业务方法，但是可以扩展，比如dubbo的filter。dubbo的filter既可以在provider端扩展，
-                                    也可以在cosumer端扩展。在cosumer调用业务方法前，消费者filter先发出一个start请求，返回后执行业务，业
-                                    务完成后再发送prepare、commit或者rollback请求，这样都是可以实现的</p>
+                                    微服务调用虽然只有一个业务方法，但是实现微服务的Rpc框架一般都可以扩展，比如dubbo的filter。dubbo的filter既可以在provider端扩展，
+                                    也可以在cosumer端扩展。在cosumer调用业务方法前，消费者filter可以写一个方法，向provider发出一个start请求，返回后执行业务，业
+                                    务完成后再发送prepare、commit或者rollback请求，理论上并不难理解</p>
                                 <p>既然要发送和接收业务外请求，我们必须在服务启动的时候，动态生成及初始化一个dubbo的事务专用service和reference，来执行这些任务</p>
-                                <p>provider启动后，dubbo服务监控如下</p>
+                                <p>meepo 的provider服务启动后，可以看到dubbo服务监控如下</p>
                                 <p><img src="https://wxbty.github.io/images/meepo/dubbo2.png" alt="事务专用service"></p>
                                 <p>RemoteCoordinator继承了XAResource接口，所以包含XAResource所有方法</p>
                                 <p><img src="https://wxbty.github.io/images/meepo/dubbo3.png" alt="RemoteCoordinator"></p>
@@ -196,3 +196,4 @@
 </div>
 </body>
 </html>
+
