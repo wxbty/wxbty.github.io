@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="zh-CN" xmlns="http://www.w3.org/1999/html">
 <head>
     <meta http-equiv="content-type" content="text/html; charset=utf-8">
     <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport">
@@ -78,8 +78,11 @@
                                 <p>我们知道，Spring IoC容器允许BeanFactoryPostProcessor在容器实例化任何bean之前读取bean的定义(配置元数据)，并可以修改它</p>
                                 <p><img src="https://wxbty.github.io/images/meepo/dubbo4.png" alt="初始化RemoteCoordinator"></p>
                                 <p><img src="https://wxbty.github.io/images/meepo/dubbo5.png" alt="初始化过程"></p>
-                                <p>上面这段meepo代码，对配置文件的dubbo的bean类型和group做了判断，从而只有在真正需要分布式事务的时候，才会加载事务service</p>
-                                <p>我们会在接下来的源码追踪里，看到RemoteCoordinator方法的具体实现</p>
+                                <p>上面这段meepo代码，对配置文件的dubbo的bean类型和group做了判断，只有在真正需要分布式事务的时候，才会加载事务service</p>
+                                <p>在bytejta里RemoteCoordinator的方法和远程服务的本地XAResource方法大致对应，这是因为两阶段提交协议的特性，事务管理器通过dubbo的方法调用，来控制远程服务XA命令</p>
+                                <p>关系大致如下：TxManager.prepare = 1、consumer.MysqlXAConnection.prepare+2、RemoteCoordinator.prepare ->provider.MysqlXAConnection.prepare </p>
+                                <p>在meepo里，RemoteCoordinator作用弱化，这是因为远程服务业务执行完成后，直接XA prepare+commit，不需要事务管理器再统一发送prepare</p>
+
                             </li>
                         </ul>
                         <ul>
@@ -89,47 +92,44 @@
                                 <p>在我们的测试用例里，dubbo调用服务只有一句</p>
                                 <p>this.remoteAccountService.decreaseAmount(sourceAcctId, amount);</p>
                                 <p>但是在流程图里，这句代码实际执行的事件非常多，包含多个请求来回，这些额外的事件是由dubbo提供的扩展点filter实现</p>
-                                <p>先简单介绍下dubbo的设计<a href="http://dubbo.apache.org/zh-cn/docs/dev/design.html">dubbo框架设计</a></p>
+                                <p>先简单介绍下dubbo的设计<a href="http://dubbo.apache.org/zh-cn/docs/dev/design.html">（官网）</a></p>
                                 <p>dubbo对服务调用的过程进行了分层设计，使用动态代理对调用过程层层封装，以达到每个模块单一职责的设计目标</p>
                                 <p>dubbo在服务启动解析bean的时候，初始化一个invoker链，每个invoker对应一层的可执行体，可执行体实现Invoker接口，实现invoke方法</p>
                                 <p>所以我们在跟踪dubbo的代码时，经常跳到一个Invoker，完成当前层的任务后，又跳到下一个Invoker里</p>
-                                <p>dubbo中供开发者扩展的filter，也可视作一个分层，虽然没有实现Invoker接口，但实现但Filter接口也又invoke方法</p>
-                                <p>调试进入remoteAccountService.decreaseAmount，第一层是MockClusterInvoker的代理类，除了对toString等Object方法进行本地处理，主要初始化了RpcInvocation对象,Invocation 是会话域，它持有调用过程中的变量，比如方法名，参数等</p>
+                                <p>dubbo中供开发者扩展的filter，也可视作一个分层，虽然没有实现Invoker接口，但也有invoke方法</p>
+                                <p>1、调试进入remoteAccountService.decreaseAmount，第一层是MockClusterInvoker的代理类，除了对toString等Object方法进行本地处理，主要初始化了RpcInvocation对象,Invocation 是会话域，它持有调用过程中的变量，比如方法名，参数等</p>
                                 <p><img src="https://wxbty.github.io/images/meepo/dubbo7.png" alt="Invoker调用链"></p>
-                                <p>进入MockClusterInvoker的invoker方法，判断bean里是否有配置mock，如有，执行doMockInvoke，然后进入下一个Invoker</p>
+                                <p>2、然后进入MockClusterInvoker的invoker方法，判断bean里是否有配置mock，如有，执行doMockInvoke，然后进入下一个Invoker</p>
                                 <p>MockClusterInvoker的作用主要是服务降级，invoker链的下一个是FailfastClusterInvoker</p>
                                 <p><img src="https://wxbty.github.io/images/meepo/dubbo8.png" alt="Invoker调用链"></p>
                                 <p>关于dubbo的原理流程，有兴趣的读者可以自行研究,这里不再叙述，代码直接跳到filter的Invoker方法,filter属于protocol远程调用层</p>
-                                <p>根据分层原理，dubbo的filter执行的时机是：cosumer-filter -> 调用远程服务 ->provider-filter->provider执行业务</p>
+                                <p>3、根据分层原理，dubbo的filter执行的时机是：cosumer-filter -> 调用远程服务 ->provider-filter->provider执行业务</p>
                                 <p><img src="https://wxbty.github.io/images/meepo/dubbo9.png" alt="Invoker调用链-filter"></p>
-                                <p>进入业务service前的处理</p>
-                                <p><img src="https://wxbty.github.io/images/meepo/dubbo10.png" alt="Invoker调用链-filter"></p>
-                                <p>在consumerInvokeForSVC方法中，做一些初始化bean的工作</p>
+                                <p>进入业务service前的处理，在consumerInvokeForSVC方法中，做了一些初始化bean的工作</p>
                                 <p><img src="https://wxbty.github.io/images/meepo/dubbo11.png" alt="consumerInvokeForSVC"></p>
-                                <p>关注调用远程接口前的beforeConsumerInvokeForSVC方法</p>
+                                <p>4、我们关注下调用远程接口前的beforeConsumerInvokeForSVC方法</p>
                                 <p><img src="https://wxbty.github.io/images/meepo/dubbo12.png" alt="consumerInvokeForSVC"></p>
                                 <p><img src="https://wxbty.github.io/images/meepo/dubbo13.png" alt="consumerInvokeForSVC"></p>
                                 <p>beforeSendRequest封装了流程图里的enlist方法</p>
                                 <p><img src="https://wxbty.github.io/images/meepo/dubbo14.png" alt="enlist"></p>
-                                <p>enlist方法做了两件事，1、把当前remoteXAResource加入全局事务管理；2、调用远程star方法</p>
-                                <p><img src="https://wxbty.github.io/images/meepo/dubbo16.png" alt="enlist"></p>
+                                <p>5、enlist方法做了两件事，1、把当前remoteXAResource加入全局事务管理；2、调用远程start方法</p>
                                 <p><img src="https://wxbty.github.io/images/meepo/dubbo15.png" alt="enlist"></p>
                                 <p><img src="https://wxbty.github.io/images/meepo/dubbo17.png" alt="enlist"></p>
-                                <p>继续进入start方法，除了执行一些之前动态代理不重要的操作，又进入了我们熟悉的dubbo第一层Invoker调用链，这也符合前面流程图的步骤，先start再业务方法</p>
+                                <p>6、继续进入start方法，除了执行一些之前动态代理不重要的操作，又进入了我们熟悉的dubbo第一层Invoker调用链，这也符合前面流程图的步骤，start方法先于业务方法</p>
                                 <p>start方法进入到consumer的filter后，做了一些上下文内容的处理，就进入了provider的filter，provider的filter及RemoteCoordinator接口的 start方法中，也仅仅把上下文中传入的事务，绑定到当前线程</p>
                                 <p>流程图中，dubbo接口的start方法，并未和provider本地数据库的start方法同步，因为直到真正执行业务方法，才能获取到provider端的XA连接</p>
-                                <p>这里需要说明的是，xa中的start，和end，代表了xa事务管理的边界，而不是开始和结束事务的意思，xa执行到end方法后，相应的记录并不会锁定。真正的开始事务是prepare、结束则是commit或rollback，期间数据库资源被锁定</p>
+                                <p>这里需要说明的是，xa中的start和end，代表了xa事务管理的边界，而不是开始和结束事务的意思，xa执行到end方法后，相应的记录并不会锁定。真正的开始事务是prepare、结束则是commit或rollback，期间数据库资源被锁定</p>
 
-                                <p>我们整理下当前已执行的步骤</p>
+                                <p>我们整理下当前<strong> 已执行的步骤</strong></p>
                                 <p>dubbo业务调用（未执行）-> enlist(DubboXAResource)->RemoteCoordinator.start->start返回</p>
-                                <p>接下来进入到dubbo业务方法的filter，执行步骤：执行dubbo业务->provider本地XA prepare->provider本地XA commit->线程解绑事务</p>
-                                <p>以上步骤是meepo和bytejta的根本不同指处，bytejta在业务执行完后直接返回consumer，provider等待下一次cosumer调用的prepare指令，
+                                <p>7、接下来进入到dubbo业务方法的filter，执行步骤：执行dubbo业务->provider本地XA prepare->provider本地XA commit->线程解绑事务</p>
+                                <p>以上步骤是meepo和bytejta的根本不同之处，bytejta在业务执行完后直接返回consumer，provider等待下一次cosumer调用的prepare指令，
                                     而meepo直接一步到位，执行完xa所有流程，数据库资源得到释放</p>
                                 <p>meepo的consumer在得到业务返回的结果后，如果有异常，则全局事务发布统一回滚，对dubbo服务来说，即调用RemoteCoordinator接口的rollback</p>
                                 <p>meepo从持久化到数据库表txc_undo_log中的前后镜像信息，进行回滚操作</p>
                                 <p>如果没有异常，则全局事务发布统一commit，异步清理txc_undo_log表信息及锁表信息</p>
-                                <p>关于txc_undo_log中的前后镜像信息如何生成，会在后面博文中体现</p>
-                                <p>如果你够仔细的话，会发现在整个流程中，XA start 和end还没有执行，这两个步骤是在执行业务的时候，获取到数据库连接enlist阶段的时候执行，具体见上文最后处</p>
+                                <p>关于txc_undo_log中的前后镜像信息如何生成，会在后面文章中体现</p>
+                                <p>如果你够仔细的话，会发现在整个流程中，XA start 和end还没有执行，这两个步骤是在执行业务的时候，获取到数据库连接enlist阶段的时候执行，见前文最后处</p>
                                 <p>无论是哪个服务，在执行服务中分支事务的时候，都会在dbcp2 enlist阶段，在服务的数据库连接中执行start和end方法</p>
 
                             </li>
