@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8">
+    <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport">
+    <meta content="yes" name="apple-mobile-web-app-capable">
+    <meta content="black-translucent" name="apple-mobile-web-app-status-bar-style">
+    <meta content="telephone=no" name="format-detection">
+    <meta name="description" content="回到梦开始的地方！">
+    <title>meepo源码解析系列(六)之项目实战 | 飞过海</title>
+    <link rel="stylesheet" type="text/css" href="/css/style.css?v=0.0.0">
+    <link rel="stylesheet" type="text/css" href="//cdn.bootcss.com/normalize/7.0.0/normalize.min.css">
+    <link rel="stylesheet" type="text/css" href="//cdn.bootcss.com/pure/1.0.0/pure-min.css">
+    <link rel="stylesheet" type="text/css" href="//cdn.bootcss.com/pure/1.0.0/grids-responsive-min.css">
+    <link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css">
+    <script type="text/javascript" src="//cdn.bootcss.com/jquery/3.2.1/jquery.min.js"></script>
+    <link rel="Shortcut Icon" type="image/x-icon" href="/favicon.ico">
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+    <link rel="apple-touch-icon-precomposed" href="/apple-touch-icon.png">
+</head>
+<body>
+<div class="body_container">
+    <div id="header">
+        <div class="site-name"><h1 class="hidden">meepo源码解析系列(六)之项目实战</h1><a id="logo" href="/.">飞过海</a>
+            <p class="description">回到梦开始的地方！</p></div>
+        <div id="nav-menu"><a href="/." class="current"><i class="fa fa-home"> 首页</i></a><a href="/archives/"><i
+                class="fa fa-archive"> 归档</i></a><a href="/about/"><i class="fa fa-user"> 关于</i></a><a href="/atom.xml"><i
+                class="fa fa-rss"> 订阅</i></a></div>
+    </div>
+    <div id="layout" class="pure-g">
+        <div class="pure-u-1 pure-u-md-3-4">
+            <div class="content_container">
+                <div class="post"><h1 class="post-title">meepo源码解析系列(六)之项目实战</h1>
+                    <div class="post-meta">Aug 09, 2018<span> | </span><span class="category"><a
+                            href="/categories/meepo/">meepo</a></span></div>
+                    <div class="post-content"><h4 id="这一篇，我们将跟踪代码dubbo远程服务执行业务代码！"><a
+                            href="#这一篇，我们将跟踪代码dubbo远程服务执行业务代码！" class="headerlink"
+                            title="这一篇，我们将跟踪代码dubbo远程服务执行业务代码！"></a>这一篇，我们将跟踪代码dubbo远程服务执行业务代码！
+                    </h4>
+                        <ul>
+                            <li>
+                                <p>
+                                    在我们的实际业务中，普遍使用了微服务框架，demo里本地sql和dubbo接口需要共享事务的场景非常多，二阶段提交协议比较知名的Atomikos框架，只能处理一个服务+多个数据库源的场景。</p>
+                                <p>
+                                    那我们怎么处理这种情况呢？其实思路很简单，可以按照JTA的规范来。JTA里的XAResource，并不仅仅是数据库连接，其他连接比如RPC接口、MQ都可以实现XAResource，从而被全局事务管理</p>
+                                <p>在XA/JTA协议的实现里，客户端本地事务里的DML对应一个XAResource。XAResource 是 Distributed Transaction
+                                    Processing: The XA Specification 标准的 Java
+                                    实现，它是对底层事务资源的抽象，定义了分布式事务处理过程中事务管理器和资源管理器之间的协议，各事务资源提供商（如 JDBC
+                                    驱动，JMS）将提供此接口的实现。使用此接口，开发人员可以通过自己的编程实现分布式事务处理，但这些通常都是由应用服务器实现的（服务器自带实现更加高效，稳定）
+                                    为了说明，我们将举例说明他的使用方式</p>
+                                <p>比如mysql实现XAResource的实现类MysqlXAConnection，看一下prepare方法</p>
+                                <p><img src="https://wxbty.github.io/images/meepo/xa1.png" alt="MysqlXAConnection"></p>
+                                <p>最终用jdbc来下发XA PREPARE命令</p>
+                                <p><img src="https://wxbty.github.io/images/meepo/xa2.png" alt="jdbc下发"></p>
+                                <p>下图是一次genenral_log一次完整的XA事务sql命令记录</p>
+                                <p><img src="https://wxbty.github.io/images/meepo/xa3.png" alt="XA事务sql记录"></p>
+                                <p>搞清楚了数据库实现XAResource的流程，接下来我们分析下dubbo服务如何实现JTA里的XAResource接口</p>
+                            </li>
+                        </ul>
+                        <ul>
+                            <li><p><strong>一、dubbo服务实现XAResource</strong></p>
+                                <p>实现XAResource则必须实现XAResource下面的几个方法，如start、end、prepare、commit等方法</p>
+                                <p>但问题是无论是dubbo还是其他微服务，都只有一个业务方法，这种情况下该如何来扩展</p>
+                                <p>再深入了解byteJta或者阿里GTS前，一直觉得，除了接口提供方和接口消费者，还得有一个第三方中间件来协调全局事务，
+                                    因为消费者承担不了这个角色，我们会觉得，在物理上消费者连接不到提供者的数据库，如何来协调事务提交或还原</p>
+                                <p>持有这个观点的，除了开始研究时本人和同事的观点。还有下面这位</p>
+                                <p><img src="https://wxbty.github.io/images/meepo/dubbo1.png" alt=""></p>
+                                <p>
+                                    微服务虽然只有一个业务方法，但是可以扩展，比如dubbo的filter。dubbo的filter既可以在provider端扩展，
+                                    也可以在cosumer端扩展。在cosumer调用业务方法前，消费者filter先发出一个start请求，返回后执行业务，业
+                                    务完成后再发送prepare、commit或者rollback请求，这样都是可以实现的</p>
+                                <p>既然要发送和接收业务外请求，我们必须在服务启动的时候，动态生成及初始化一个dubbo的事务专用service和reference，来执行这些任务</p>
+                                <p>provider启动后，dubbo服务监控如下</p>
+                                <p><img src="https://wxbty.github.io/images/meepo/dubbo2.png" alt="事务专用service"></p>
+                                <p>RemoteCoordinator继承了XAResource接口，所以包含XAResource所有方法</p>
+                                <p><img src="https://wxbty.github.io/images/meepo/dubbo3.png" alt="RemoteCoordinator"></p>
+                                <p>再来看一下RemoteCoordinator如何生成。在jta-supports-dubbo-core.xml（spring配置文件引入）里，定义的TransactionConfigPostProcessor扩展了spring的BeanFactoryPostProcessor接口</p>
+                                <p>我们知道，Spring IoC容器允许BeanFactoryPostProcessor在容器实例化任何bean之前读取bean的定义(配置元数据)，并可以修改它</p>
+                                <p><img src="https://wxbty.github.io/images/meepo/dubbo4.png" alt="初始化RemoteCoordinator"></p>
+                                <p><img src="https://wxbty.github.io/images/meepo/dubbo5.png" alt="初始化过程"></p>
+                                <p>上面这段meepo代码，对配置文件的dubbo的bean类型和group做了判断，从而只有在真正需要分布式事务的时候，才会加载事务service</p>
+                                <p>我们会在接下来的源码追踪里，看到RemoteCoordinator方法的具体实现</p>
+                            </li>
+                        </ul>
+                        <ul>
+                            <li><p><strong>二、源码追踪</strong></p>
+                                <p>阅读源码前，我们先看一下dubbo服务实现XAResource的流程图</p>
+                                <p><img src="https://wxbty.github.io/images/meepo/dubbo6.png" alt="dubbo jta"></p>
+                                <p>在我们的测试用例里，dubbo调用服务只有一句</p>
+                                <p>this.remoteAccountService.decreaseAmount(sourceAcctId, amount);</p>
+                                <p>但是在流程图里，这句代码实际执行的事件非常多，包含多个请求来回，这些额外的事件是由dubbo提供的扩展点filter实现</p>
+                                <p>先简单介绍下dubbo的设计<a href="http://dubbo.apache.org/zh-cn/docs/dev/design.html">dubbo框架设计</a></p>
+                                <p>dubbo对服务调用的过程进行了分层设计，使用动态代理对调用过程层层封装，以达到每个模块单一职责的设计目标</p>
+                                <p>dubbo在服务启动解析bean的时候，初始化一个invoker链，每个invoker对应一层的可执行体，可执行体实现Invoker接口，实现invoke方法</p>
+                                <p>所以我们在跟踪dubbo的代码时，经常跳到一个Invoker，完成当前层的任务后，又跳到下一个Invoker里</p>
+                                <p>dubbo中供开发者扩展的filter，也可视作一个分层，虽然没有实现Invoker接口，但实现但Filter接口也又invoke方法</p>
+                                <p>调试进入remoteAccountService.decreaseAmount，第一层是MockClusterInvoker的代理类，除了对toString等Object方法进行本地处理，主要初始化了RpcInvocation对象,Invocation 是会话域，它持有调用过程中的变量，比如方法名，参数等</p>
+                                <p><img src="https://wxbty.github.io/images/meepo/dubbo7.png" alt="Invoker调用链"></p>
+                                <p>进入MockClusterInvoker的invoker方法，判断bean里是否有配置mock，如有，执行doMockInvoke，然后进入下一个Invoker</p>
+                                <p>MockClusterInvoker的作用主要是服务降级，invoker链的下一个是FailfastClusterInvoker</p>
+                                <p><img src="https://wxbty.github.io/images/meepo/dubbo8.png" alt="Invoker调用链"></p>
+                                <p>关于dubbo的原理流程，有兴趣的读者可以自行研究,这里不再叙述，代码直接跳到filter的Invoker方法,filter属于protocol远程调用层</p>
+                                <p>根据分层原理，dubbo的filter执行的时机是：cosumer-filter -> 调用远程服务 ->provider-filter->provider执行业务</p>
+                                <p><img src="https://wxbty.github.io/images/meepo/dubbo9.png" alt="Invoker调用链-filter"></p>
+                                <p>进入业务service前的处理</p>
+                                <p><img src="https://wxbty.github.io/images/meepo/dubbo10.png" alt="Invoker调用链-filter"></p>
+                                <p>在consumerInvokeForSVC方法中，做一些初始化bean的工作</p>
+                                <p><img src="https://wxbty.github.io/images/meepo/dubbo11.png" alt="consumerInvokeForSVC"></p>
+                                <p>关注调用远程接口前的beforeConsumerInvokeForSVC方法</p>
+                                <p><img src="https://wxbty.github.io/images/meepo/dubbo12.png" alt="consumerInvokeForSVC"></p>
+                                <p><img src="https://wxbty.github.io/images/meepo/dubbo13.png" alt="consumerInvokeForSVC"></p>
+                                <p>beforeSendRequest封装了流程图里的enlist方法</p>
+                                <p><img src="https://wxbty.github.io/images/meepo/dubbo14.png" alt="enlist"></p>
+                                <p>enlist方法做了两件事，1、把当前remoteXAResource加入全局事务管理；2、调用远程star方法</p>
+                                <p><img src="https://wxbty.github.io/images/meepo/dubbo16.png" alt="enlist"></p>
+                                <p><img src="https://wxbty.github.io/images/meepo/dubbo15.png" alt="enlist"></p>
+                                <p><img src="https://wxbty.github.io/images/meepo/dubbo17.png" alt="enlist"></p>
+                                <p>继续进入start方法，除了执行一些之前动态代理不重要的操作，又进入了我们熟悉的dubbo第一层Invoker调用链，这也符合前面流程图的步骤，先start再业务方法</p>
+                                <p>start方法进入到consumer的filter后，做了一些上下文内容的处理，就进入了provider的filter，provider的filter及RemoteCoordinator接口的 start方法中，也仅仅把上下文中传入的事务，绑定到当前线程</p>
+                                <p>流程图中，dubbo接口的start方法，并未和provider本地数据库的start方法同步，因为直到真正执行业务方法，才能获取到provider端的XA连接</p>
+                                <p>这里需要说明的是，xa中的start，和end，代表了xa事务管理的边界，而不是开始和结束事务的意思，xa执行到end方法后，相应的记录并不会锁定。真正的开始事务是prepare、结束则是commit或rollback，期间数据库资源被锁定</p>
+
+                                <p>我们整理下当前已执行的步骤</p>
+                                <p>dubbo业务调用（未执行）-> enlist(DubboXAResource)->RemoteCoordinator.start->start返回</p>
+                                <p>接下来进入到dubbo业务方法的filter，执行步骤：执行dubbo业务->provider本地XA prepare->provider本地XA commit->线程解绑事务</p>
+                                <p>以上步骤是meepo和bytejta的根本不同指处，bytejta在业务执行完后直接返回consumer，provider等待下一次cosumer调用的prepare指令，
+                                    而meepo直接一步到位，执行完xa所有流程，数据库资源得到释放</p>
+                                <p>meepo的consumer在得到业务返回的结果后，如果有异常，则全局事务发布统一回滚，对dubbo服务来说，即调用RemoteCoordinator接口的rollback</p>
+                                <p>meepo从持久化到数据库表txc_undo_log中的前后镜像信息，进行回滚操作</p>
+                                <p>如果没有异常，则全局事务发布统一commit，异步清理txc_undo_log表信息及锁表信息</p>
+                                <p>关于txc_undo_log中的前后镜像信息如何生成，会在后面博文中体现</p>
+                                <p>如果你够仔细的话，会发现在整个流程中，XA start 和end还没有执行，这两个步骤是在执行业务的时候，获取到数据库连接enlist阶段的时候执行，具体见上文最后处</p>
+                                <p>无论是哪个服务，在执行服务中分支事务的时候，都会在dbcp2 enlist阶段，在服务的数据库连接中执行start和end方法</p>
+
+                            </li>
+                        </ul>
+                        </div>
+                    <div class="tags"></div>
+                    <div class="post-nav"><a href="/2018/08/04/base/three/"
+                                             class="pre">meepo源码解析系列(五)之项目实战</a><a
+                            href="#" class="next">meepo源码解析系列(七)之项目实战</a></div>
+                </div>
+            </div>
+        </div>
+        <div class="pure-u-1-4 hidden_mid_and_down">
+            <div id="sidebar">
+                <div class="widget">
+                    <form action="//www.google.com/search" method="get" accept-charset="utf-8" target="_blank"
+                          class="search-form"><input type="text" name="q" maxlength="20" placeholder="Search"/><input
+                            type="hidden" name="sitesearch" value="http://wxbty.github.io"/></form>
+                </div>
+                <div class="widget">
+                    <div class="widget-title"><i class="fa fa-folder-o"> 分类</i></div>
+                    <ul class="category-list">
+                        <li class="category-list-item"><a class="category-list-link"
+                                                          href="/categories/Raincat/">Raincat</a><span
+                                class="category-list-count">3</span></li>
+                        <li class="category-list-item"><a class="category-list-link" href="/categories/meepo/">meepo</a><span
+                                class="category-list-count">6</span></li>
+                    </ul>
+                </div>
+                <div class="widget">
+                    <div class="widget-title"><i class="fa fa-star-o"> 标签</i></div>
+                    <div class="tagcloud"></div>
+                </div>
+                <div class="widget">
+                    <div class="widget-title"><i class="fa fa-file-o"> 最近文章</i></div>
+                    <ul class="post-list">
+                        <li class="post-list-item"><a class="post-list-link" href="/2018/08/01/start/one/">meepo源码解析系列(一)之项目结构</a>
+                        </li>
+                        <li class="post-list-item"><a class="post-list-link" href="/2018/08/01/start/two/">meepo源码解析系列(二)之环境搭建</a>
+                        </li>
+                        <li class="post-list-item"><a class="post-list-link" href="/2018/08/04/base/one/">meepo源码解析系列(三)之框架架构</a>
+                        </li>
+                        <li class="post-list-item"><a class="post-list-link" href="/2018/08/04/base/two/">meepo源码解析系列(四)之项目实战</a>
+                        </li>
+                        <li class="post-list-item"><a class="post-list-link" href="/2018/08/04/base/three/">meepo源码解析系列(五)之项目实战</a>
+                        </li>
+
+                    </ul>
+                </div>
+                <div class="widget">
+                    <div class="widget-title"><i class="fa fa-external-link"> 友情链接</i></div>
+                    <ul></ul>
+                    <a href="https://github.com/wxbty" title="GitHub" target="_blank">GitHub</a>
+                    <ul></ul>
+                    <a href="http://www.iocoder.cn/" title="芋道源码" target="_blank">芋道源码</a></div>
+            </div>
+        </div>
+        <div class="pure-u-1 pure-u-md-3-4">
+            <div id="footer">Copyright © 2018 <a href="/." rel="nofollow">飞过海.</a> Powered by<a rel="nofollow"
+                                                                                                target="_blank"
+                                                                                                href="https://hexo.io">
+                Hexo.</a><a rel="nofollow" target="_blank" href="https://github.com/tufu9441/maupassant-hexo"> Theme</a>
+                by<a rel="nofollow" target="_blank" href="https://github.com/pagecho"> Cho.</a></div>
+        </div>
+    </div>
+    <a id="rocket" href="#top" class="show"></a>
+    <script type="text/javascript" src="/js/totop.js?v=0.0.0" async></script>
+    <script type="text/javascript" src="//cdn.bootcss.com/fancybox/3.1.20/jquery.fancybox.min.js" async></script>
+    <script type="text/javascript" src="/js/fancybox.js?v=0.0.0" async></script>
+    <link rel="stylesheet" type="text/css" href="//cdn.bootcss.com/fancybox/3.1.20/jquery.fancybox.min.css">
+    <script type="text/javascript" src="/js/codeblock-resizer.js?v=0.0.0"></script>
+    <script type="text/javascript" src="/js/smartresize.js?v=0.0.0"></script>
+</div>
+</body>
+</html>

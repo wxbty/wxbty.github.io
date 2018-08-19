@@ -128,7 +128,7 @@
                                 <p>4、第一次sql执行，将当前连接加入到全局事务中，注意
                                     transactionContext.setSharedConnection(connection);这一句</p>
                                 <p><img src="https://wxbty.github.io/images/meepo/dbcp13.png" alt="enlist-resource"></p>
-                                <p>enlist代码和深度历险的实现相同，最后放入transaction的list中，此处不再追踪</p>
+                                <p>enlist代码和深度历险的实现相同，最后放入transaction的list中，并执行本地XAResource（如MysqlXAConnection） 的start 和 end 方法</p>
                                 <p>enlist完成后，得到connection，并创建Statement，执行sql，和jdbc的一致。这里的
                                     connection和Statement都是通过动态代理增强的实现，具体实现和作用请见后文。</p>
                                 <p>本地sql执行完成后，因为在事务的管理中，sql结果并不会生效，如果打开mysql的general_log观察，此时已经有sql记录，但相应表数据并未改变</p>
@@ -179,6 +179,8 @@
                         <li class="post-list-item"><a class="post-list-link" href="/2018/08/04/base/one/">meepo源码解析系列(三)之框架架构</a>
                         </li>
                         <li class="post-list-item"><a class="post-list-link" href="/2018/08/04/base/two/">meepo源码解析系列(四)之项目实战</a>
+                        </li>
+                        <li class="post-list-item"><a class="post-list-link" href="/2018/08/04/base/three/">meepo源码解析系列(六)之项目实战</a>
                         </li>
                     </ul>
                 </div>
