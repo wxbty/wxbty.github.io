@@ -48,27 +48,28 @@
                                     ='"+acctId+"'");这一句</p>
                                 <p>代码跟踪进入jdbcTemple，完了后直接返回到demo方法中，貌似没有地方可以做手脚。为此，我花了不少时间在数据库的sql日志获取实现上。</p>
                                 <p>mysql还算顺利，general_log 完整的记录了所有历史sql，而且可以通过 set output
-                                    =table，记录在mysql.general_log数据表中，但是仍然碰到了不少问题，比如：</p>
+                                    =table，记录在mysql.general_log数据表中。但是仍然碰到了不少问题，比如：</p>
                                 <p>1、mysql日志数量太大，比如心跳连接的select
                                     x，close及其他无意义的日志。这个我通过精确开关日志解决，在执行业务sql前合适的地方打开日志，执行完后再关闭</p>
                                 <p>2、在历史记录中查找业务sql有点冒险，会不会查到上次执行的sql或者执行了一组sql，只拿到一条或者几条，这个风险只能通过反复测试，健壮的程序来保证</p>
-                                <p>还有一些其他小问题</p>
-                                <p>解决了mysql的日志，还要扩展其他流行的数据库，当研究了postgresql的日志后，我准备放弃了，比mysql麻烦多了</p>
-                                <p>一想后面还有无数种数据库，我迫切地想知道，GTS怎么解决这个问题</p>
+                                <p>解决了mysql的日志，还需要扩展其他流行的数据库，但是当研究了postgresql的日志后，准备放弃了，因为拿到想要的sql比mysql麻烦多了</p>
+                                <p>一想到后面还有无数种数据库，我迫切地想知道，GTS怎么解决这个问题</p>
                                 <p>在翻了网上有限的资料，和混淆过的反编译源码，在专利上找到这一句</p>
                                 <p><img src="https://wxbty.github.io/images/meepo/zhuanli.png" alt="专利"></p>
                                 <p>GTS貌似很轻松的拿到了执行的sql，翻遍整个专利说明，没有任何提及数据库日志的地方，那只有一种可能，就是通过代理。这gts代码中找到下图代码</p>
                                 <p><img src="https://wxbty.github.io/images/meepo/gts_code.png" alt="gtscode1"></p>
                                 <p>图中路径是com.taobao.txc.resourcemanager.b.a</p>
                                 <p>
-                                    gts在初始化数据连接的时候，已经对connection和Statement进行代理，jdbcTemple拿到的Statement是自定义增强后的Statement，此时想拿到sql就非常简单了，如下图的var2</p>
+                                    gts在初始化数据连接的时候，已经对connection和Statement进行代理，jdbcTemple拿到的Statement是自定义增强后的Statement，此时想拿到sql就非常简单了，如下图的var1</p>
                                 <p><img src="https://wxbty.github.io/images/meepo/gts_code2.png" alt="gtscode2"></p>
                                 <p>这里我有点不理解的是gts用了静态代理，虽然不影响实现，但是对被代理类的三四十个方法都要多写两句，非常不优雅，如下</p>
                                 <p><img src="https://wxbty.github.io/images/meepo/gts_code3.png" alt="gtscode3"></p>
                                 <p>
-                                    这里我是不会学的，用动态代理就好了，if("executeUpdate".equalse(methodName)搞定,见meepo的DynamicPreparedStatementProxyHandler类</p>
+                                    这一点我当然不会学，用动态代理就好了，if("executeUpdate".equalse(methodName)搞定,见meepo的DynamicPreparedStatementProxyHandler类</p>
                                 <p>拿到sql后就简单了，把DML的sql处理成select的sql，获得前后镜像，持久化到txc_undo_log，在txc_lock插入记录行，防止其他事务修改。</p>
-                                <p>这一部分代码，在DynamicPreparedStatementProxyHandler的invoke方法全部体现</p>
+                                <p>这一部分代码，体现在在DynamicPreparedStatementProxyHandler的invoke方法</p>
+                            </li>
+                            <li>
                                 <p>最近有朋友加我，跟我说想参与meepo，帮我加上mybatis的支持。我问他你怎么知道meepo不支持mybatis，回答说这meepo上没有看到mybatis包的引用</p>
                                 <p>这里强调一下，meepo支持mybatis，这是meepo动态代理statement的原理决定的</p>
                                 <p>无论是jdbcTemplate或者是mybatis，无论怎么封装，底层都是jdbc，执行顺序：getConnection->getStatement->stmt.execute()</p>
