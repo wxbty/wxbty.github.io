@@ -93,7 +93,16 @@
                                 <p><img src="https://wxbty.github.io/images/meepo/limit.png" alt="gts注意事项"></p>
                             </li>
                         </ul>
-
+                        <ul>
+                            <li><p><strong>FAQ</strong></p>
+                                <p>最后在补上一个多人问过的问题</p>
+                                <p>A调用B，B调用C、D，D再调用E，E抛异常，meepo是否会回滚</p>
+                                <p>回答如下：这得看 E出现 异常后,D是否会捕获，如果没有捕获，当成可控的，事务不会回滚；如果没有捕获，B一直向上抛，当然就回滚了</p>
+                                <p>这个依赖spring实现事务的原理</p>
+                                <p><img src="https://wxbty.github.io/images/meepo/code2.png" alt="gts注意事项"></p>
+                                <p>spring 客户端事务管理器,在第一层调用的时候，如果返回异常就回滚，没有就提交</p>
+                            </li>
+                        </ul>
 
                     </div>
                     <div class="tags"></div>
