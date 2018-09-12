@@ -7,7 +7,7 @@
     <meta content="black-translucent" name="apple-mobile-web-app-status-bar-style">
     <meta content="telephone=no" name="format-detection">
     <meta name="description" content="回到梦开始的地方！">
-    <title>meepo源码解析系列(七)之项目实战 | 飞过海</title>
+    <title>meepo源码解析系列(八)之优化方案 | 飞过海</title>
     <link rel="stylesheet" type="text/css" href="/css/style.css?v=0.0.0">
     <link rel="stylesheet" type="text/css" href="//cdn.bootcss.com/normalize/7.0.0/normalize.min.css">
     <link rel="stylesheet" type="text/css" href="//cdn.bootcss.com/pure/1.0.0/pure-min.css">
@@ -21,7 +21,7 @@
 <body>
 <div class="body_container">
     <div id="header">
-        <div class="site-name"><h1 class="hidden">meepo源码解析系列(七)之项目实战</h1><a id="logo" href="/.">飞过海</a>
+        <div class="site-name"><h1 class="hidden">meepo源码解析系列(八)之优化方案</h1><a id="logo" href="/.">飞过海</a>
             <p class="description">回到梦开始的地方！</p></div>
         <div id="nav-menu"><a href="/." class="current"><i class="fa fa-home"> 首页</i></a><a href="/archives/"><i
                 class="fa fa-archive"> 归档</i></a><a href="/about/"><i class="fa fa-user"> 关于</i></a><a href="/atom.xml"><i
@@ -30,7 +30,7 @@
     <div id="layout" class="pure-g">
         <div class="pure-u-1 pure-u-md-3-4">
             <div class="content_container">
-                <div class="post"><h1 class="post-title">meepo源码解析系列(七)之项目实战</h1>
+                <div class="post"><h1 class="post-title">meepo源码解析系列(八)之优化方案</h1>
                     <div class="post-meta">Aug 09, 2018<span> | </span><span class="category"><a
                             href="/wxbty/meepo">meepo</a></span></div>
                     <div class="post-content"><h4 id="这一篇，我们讲下meepo如何生成前后镜像信息！"><a
@@ -97,7 +97,7 @@
                             <li><p><strong>FAQ</strong></p>
                                 <p>最后在补上一个多人问过的问题</p>
                                 <p>A调用B，B调用C、D，D再调用E，E抛异常，meepo是否会回滚？</p>
-                                <p>回答如下：这得看 E出现 异常后,D是否会捕获，如果没有捕获，当成可控的，事务不会回滚；如果没有捕获，B一直向上抛，当然就回滚了</p>
+                                <p>回答如下：这得看 E出现 异常后,D是否会捕获，如果有捕获，当成可控的，事务不会回滚；如果没有捕获，B一直向上抛，当然就回滚了</p>
                                 <p>这个依赖spring实现事务的原理</p>
                                 <p><img src="https://wxbty.github.io/images/meepo/code2.png" alt="gts注意事项"></p>
                                 <p>spring 客户端事务管理器,在第一层调用的时候，如果返回异常就回滚，没有就提交</p>
@@ -107,8 +107,8 @@
                     </div>
                     <div class="tags"></div>
                     <div class="post-nav"><a href="/2018/08/09/dubbo/one/"
-                                             class="pre">meepo源码解析系列(六)之项目实战</a><a
-                            href="#" class="next">meepo源码解析系列(八)之项目实战</a></div>
+                                             class="pre">meepo源码解析系列(七)之项目实战</a><a
+                            href="#" class="next">meepo源码解析系列(九)之项目实战</a></div>
                 </div>
             </div>
         </div>
