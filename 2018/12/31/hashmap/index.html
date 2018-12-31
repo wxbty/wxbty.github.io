@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8">
+    <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport">
+    <meta content="yes" name="apple-mobile-web-app-capable">
+    <meta content="black-translucent" name="apple-mobile-web-app-status-bar-style">
+    <meta content="telephone=no" name="format-detection">
+    <meta name="description" content="时间行者！">
+    <title>hashmap解析 | 飞过海</title>
+    <link rel="stylesheet" type="text/css" href="/css/style.css?v=0.0.0">
+    <link rel="stylesheet" type="text/css" href="//cdn.bootcss.com/normalize/7.0.0/normalize.min.css">
+    <link rel="stylesheet" type="text/css" href="//cdn.bootcss.com/pure/1.0.0/pure-min.css">
+    <link rel="stylesheet" type="text/css" href="//cdn.bootcss.com/pure/1.0.0/grids-responsive-min.css">
+    <link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css">
+    <script type="text/javascript" src="//cdn.bootcss.com/jquery/3.2.1/jquery.min.js"></script>
+    <link rel="Shortcut Icon" type="image/x-icon" href="/favicon.ico">
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+    <link rel="apple-touch-icon-precomposed" href="/apple-touch-icon.png">
+</head>
+<body>
+<div class="body_container">
+    <div id="header">
+        <div class="site-name"><h1 class="hidden">hashmap解析</h1><a id="logo" href="/.">飞过海</a>
+            <p class="description">回到梦开始的地方！</p></div>
+        <div id="nav-menu"><a href="/2018/08/01/start/one/" class="current"><i class="fa fa-home"> 首页</i></a><a
+                href="#"><i
+                class="fa fa-archive"> 归档</i></a><a href="/about/"><i class="fa fa-user"> 关于</i></a><a href="/atom.xml"><i
+                class="fa fa-rss"> 订阅</i></a></div>
+    </div>
+    <div id="layout" class="pure-g">
+        <div class="pure-u-1 pure-u-md-3-4">
+            <div class="content_container">
+                <div class="post"><h1 class="post-title">hashmap解析</h1>
+                    <div class="post-meta">Aug 01, 2018<span> | </span><span class="category"><a
+                            href="/wxbty/meepo">meepo</a></span></div>
+                    <div class="post-content">
+
+                        <h3>1、hashmap的put及get原理</h3>
+                        <ul>
+                            <li>HashMap是基于hashing的原理，我们使用put(key,
+                                value)存储对象到HashMap中，使用get(key)从HashMap中获取对象。当我们给put()方法传递键和值时，我们先对键调用hashCode()方法，返回的hashCode用于找到bucket位置来储存Entry对象。
+                            </li>
+                            <li>
+                                meepo基于byteJta,byteJta是一个典型的两阶段提交协议(原理：https://www.w3cschool.cn/architectroad/architectroad-two-phase-commit.html)，JTA规范的框架，支持dubbo和springcloud，方便改写
+                            </li>
+                        </ul>
+
+
+                        <h3 id="meepo-是什么？有什么功能？"><a href="#meepo-是什么？有什么功能？"
+                                                     class="headerlink"
+                                                     title="meepo 是什么？有什么功能？"></a><a
+                                href="https://github.com/wxbty/meepo" target="_blank" rel="external">meepo</a>
+                            是什么？有什么功能？</h3>
+                        <ul>
+                            <li>meepo是一款高性能、接入简单的分布式事务中间件，用于解决分布式环境下的事务一致性问题的JTA开源方案。<a
+                                    href="https://github.com/wxbty/meepo" target="_blank"
+                                    rel="external">github地址</a></li>
+                            <li>支持dubbo框架进行分布式事务（后续会添加springcloud）。</li>
+                            <li>可以保证分布式系统中的分布式事务的 ACID 特性。 支持 Oracle、MySQL、Postgresql 等关系型数据库</li>
+                            <li>
+                                meepo是阿里GTS的一个开源实现，按GTS的流程实现各功能模块，同时限制条件也类似。比如事务里的表必须有主键；保证所有框架事务管理范围内的数据，都不会被框架管理范围外的系统所修改。GTS链接：https://help.aliyun.com/document_detail/56746.html?spm=a2c4g.11186623.6.589.cdEaX4
+                            </li>
+                            <li>
+                                meepo的全局锁表中存储了记录的加锁信息。封锁的粒度是行（记录），锁的类型包括共享锁和互斥锁，对于同一个记录，加锁的规则是共享锁与共享锁不冲突，共享锁与互斥锁冲突、互斥锁与互斥锁冲突。对插入(INSERT)、修改(UPDATE)、删除(DELETE)、更新模式的锁定查询(SELECT…
+                                FOR UPDATE) 操作加互斥锁。对于共享模式的锁定查询 (SELECT…LOCK IN SHARE MODE)
+                                操作加共享锁。若没有锁冲突，在锁表中，增加一行记录，表示加锁成功。
+                            </li>
+                        </ul>
+                        <h3 id="项目结构"><a href="#项目结构" class="headerlink" title="项目结构"></a>项目结构</h3>
+                        <p><img src="https://wxbty.github.io/images/meepo/012.png" alt="结构图"></p>
+                        <ul>
+                            </li>
+                            <li><p><strong>meepo-core</strong> 该项目是JTA框架的核心实现，包括全局事务，XA资源，锁，事务镜像、定时清理等实现。</p>
+                            </li>
+                            <li><p><strong>meepo-supports</strong> 该项目是对核心组件的支持，包括jdbc、spring、切面的实现。</p>
+                            </li>
+                            <li><p><strong>meepo-supports-dubbo</strong>
+                                该项目是对dubbo框架的支持，里面主要针对dubbo的特性的实现,最主要对filter的spi扩展。
+                            </p>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="tags"></div>
+                    <div class="post-nav"><a href="/2018/08/01/start/two/" class="pre">meepo源码解析系列(二)之环境搭建</a></div>
+                </div>
+            </div>
+        </div>
+        <div class="pure-u-1-4 hidden_mid_and_down">
+            <div id="sidebar">
+                <div class="widget">
+                    <form action="//www.google.com/search" method="get" accept-charset="utf-8" target="_blank"
+                          class="search-form"><input type="text" name="q" maxlength="20" placeholder="Search"/><input
+                            type="hidden" name="sitesearch" value="http://wxbty.github.io"/></form>
+                </div>
+                <!--<div class="widget">-->
+                <!--<div class="widget-title"><i class="fa fa-folder-o"> 分类</i></div>-->
+                <!--<ul class="category-list">-->
+                <!--<li class="category-list-item"><a class="category-list-link"-->
+                <!--href="/categories/Raincat/">Raincat</a><span-->
+                <!--class="category-list-count">3</span></li>-->
+                <!--<li class="category-list-item"><a class="category-list-link" href="/wxbty/meepo">meepo</a><span-->
+                <!--class="category-list-count">6</span></li>-->
+                <!--</ul>-->
+                <!--</div>-->
+                <!--<div class="widget">-->
+                <!--<div class="widget-title"><i class="fa fa-star-o"> 标签</i></div>-->
+                <!--<div class="tagcloud"></div>-->
+                <!--</div>-->
+                <div class="widget">
+                    <div class="widget-title"><i class="fa fa-file-o"> 最近文章</i></div>
+                    <ul class="post-list">
+                        <li class="post-list-item"><a class="post-list-link" href="/2018/08/01/start/two/">meepo源码解析系列(二)之环境搭建</a>
+                        </li>
+                        <li class="post-list-item"><a class="post-list-link" href="/2018/08/04/base/one/">meepo源码解析系列(三)之框架架构</a>
+                        </li>
+                        <li class="post-list-item"><a class="post-list-link" href="/2018/08/04/base/two/">meepo源码解析系列(四)之启动详解</a>
+                        </li>
+                        <li class="post-list-item"><a class="post-list-link" href="/2018/08/04/base/three/">meepo源码解析系列(五)之项目实战</a>
+                        </li>
+                        <li class="post-list-item"><a class="post-list-link" href="/2018/08/09/dubbo/one/">meepo源码解析系列(六)之项目实战</a>
+                        </li>
+
+                        <li class="post-list-item"><a class="post-list-link" href="/2018/08/09/dubbo/two/">meepo源码解析系列(七)之项目实战</a>
+                        </li>
+                        <!--<li class="post-list-item"><a class="post-list-link" href="/2018/08/01/meepo/two/">meepo源码解析系列(二)之环境搭建</a>-->
+                        <!--</li>-->
+                        <!--<li class="post-list-item"><a class="post-list-link" href="/2018/08/01/meepo/one/">meepo源码解析系列(一)之项目结构</a>-->
+                        <!--</li>-->
+                    </ul>
+                </div>
+                <div class="widget">
+                    <div class="widget-title"><i class="fa fa-external-link"> 友情链接</i></div>
+                    <ul></ul>
+                    <a href="https://github.com/wxbty" title="GitHub" target="_blank">GitHub</a>
+                    <ul></ul>
+                    <a href="http://www.iocoder.cn/" title="芋道源码" target="_blank">芋道源码</a></div>
+            </div>
+        </div>
+        <div class="pure-u-1 pure-u-md-3-4">
+            <div id="footer">Copyright © 2018 <a href="/." rel="nofollow">飞过海.</a> Powered by<a rel="nofollow"
+                                                                                                target="_blank"
+                                                                                                href="https://hexo.io">
+                Hexo.</a><a rel="nofollow" target="_blank" href="https://github.com/tufu9441/maupassant-hexo"> Theme</a>
+                by<a rel="nofollow" target="_blank" href="https://github.com/pagecho"> Cho.</a></div>
+        </div>
+    </div>
+    <a id="rocket" href="#top" class="show"></a>
+    <script type="text/javascript" src="/js/totop.js?v=0.0.0" async></script>
+    <script type="text/javascript" src="//cdn.bootcss.com/fancybox/3.1.20/jquery.fancybox.min.js" async></script>
+    <script type="text/javascript" src="/js/fancybox.js?v=0.0.0" async></script>
+    <link rel="stylesheet" type="text/css" href="//cdn.bootcss.com/fancybox/3.1.20/jquery.fancybox.min.css">
+    <script type="text/javascript" src="/js/codeblock-resizer.js?v=0.0.0"></script>
+    <script type="text/javascript" src="/js/smartresize.js?v=0.0.0"></script>
+</div>
+<script async src="//dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js">
+</script>
+<span id="busuanzi_container_site_pv">
+    本站总访问量<span id="busuanzi_value_site_pv"></span>次
+</span>
+<span id="busuanzi_container_site_uv">
+  本站访客数<span id="busuanzi_value_site_uv"></span>人次
+</span>
+
+</body>
+</html>
