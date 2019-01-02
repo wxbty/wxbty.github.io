@@ -37,8 +37,18 @@
 
 
 
+                        <h3>前言</h3>
+                        <ul>
+                            <li>hashmap对我来说，是一个比较常用和熟悉的数据存储结构，之前也看过多遍原理及代码，但是没有一个好的总结。作为一个最基础最重要的知识点，需要彻底理解，并沉淀下来</li>
+                            <li>之前看过的几遍，每次会有一些新的理解，比如以下几个问题</li>
+                            <li>1、负载因子表示一个散列表的空间的使用程度，分子是hash数组已占用的数量还是键值对的长度</li>
+                            <li>2、hashmap上的链表，哪边是头哪边是尾，插入一个key时，从头还是尾插入</li>
+                            <li>3、我们知道hashmap的key对象，需要重写equals和hashcode方法，平时用的时候，key大多是String，已重写过。如果是自己创建的对象，如何重写</li>
+                            <li>4、hashmap在物理内存中如何存储，又如何寻址，这个需要在头脑中有一个清晰的图</li>
+                            <li>几个问题将会在文中解答</li>
 
-                        <h3>hashmap的数据结构</h3>
+                        </ul>
+                        <h3>1、hashmap的数据结构</h3>
                         <p><img src="https://wxbty.github.io/images/hashmap/01.png" alt="数据结构"></p>
                         <ul>
                             <li>哈希表综合数组和链表的特性，是一种寻址容易，插入删除也容易的数据结构</li>
@@ -57,12 +67,28 @@
 
                         <h3>2、hashmap的put及get原理</h3>
                         <ul>
-                            <li>HashMap是基于hashing的原理，我们使用put(key,
-                                value)存储对象到HashMap中，使用get(key)从HashMap中获取对象。当我们给put()方法传递键和值时，我们先对键调用hashCode()方法，返回的hashCode用于找到bucket位置来储存Entry对象。
-                            </li>
-                            <li>55</li>
-                        </ul>
+                            <li>大致实现</li>
+                            <li>
+                                // 存储时:
+                                int hash = key.hashCode(); // 这个hashCode方法这里不详述,只要理解每个key的hash是一个固定的int值
+                                int index = hash % Entry[].length;
+                                Entry[index] = value;
 
+                                // 取值时:
+                                int hash = key.hashCode();
+                                int index = hash % Entry[].length;
+                                return Entry[index];
+                            </li>
+
+                        </ul>
+                        <ul>
+                            <li>put原理</li>
+                            <li>
+                                疑问：如果两个key通过hash%Entry[].length得到的index相同，会不会有覆盖的危险？
+                                　　这里HashMap里面用到链式数据结构的一个概念。上面我们提到过Entry类里面有一个next属性，作用是指向下一个Entry。打个比方， 第一个键值对A进来，通过计算其key的hash得到的index=0，记做:Entry[0] = A。一会后又进来一个键值对B，通过计算其index也等于0，现在怎么办？HashMap会这样做:B.next = A,Entry[0] = B,如果又进来C,index也等于0,那么C.next = B,Entry[0] = C；这样我们发现index=0的地方其实存取了A,B,C三个键值对,他们通过next这个属性链接在一起。所以疑问不用担心。也就是说数组中存储的是最后插入的元素。到这里为止，HashMap的大致实现，我们应该已经清楚了。
+                            </li>
+
+                        </ul>
                         <h3 id="项目结构"><a href="#项目结构" class="headerlink" title="项目结构"></a>项目结构</h3>
                         <p><img src="https://wxbty.github.io/images/meepo/012.png" alt="结构图"></p>
                         <ul>
