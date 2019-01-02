@@ -32,8 +32,7 @@
         <div class="pure-u-1 pure-u-md-3-4">
             <div class="content_container">
                 <div class="post"><h1 class="post-title">hashmap解析</h1>
-                    <div class="post-meta">Aug 01, 2018<span> | </span><span class="category"><a
-                            href="/wxbty/meepo">meepo</a></span></div>
+                    <div class="post-meta">Dec 31, 2018</div>
                     <div class="post-content">
 
 
@@ -43,15 +42,16 @@
                         <p><img src="https://wxbty.github.io/images/hashmap/01.png" alt="数据结构"></p>
                         <ul>
                             <li>哈希表综合数组和链表的特性，是一种寻址容易，插入删除也容易的数据结构</li>
-                            <li>支持dubbo框架进行分布式事务（后续会添加springcloud）。</li>
-                            <li>可以保证分布式系统中的分布式事务的 ACID 特性。 支持 Oracle、MySQL、Postgresql 等关系型数据库</li>
+                            <li>从上图我们可以发现哈希表是由数组+链表组成的，一个长度为16的数组中，每个元素存储的是一个链表的头结点。那么这些元素是按照什么样的规则存储到数组中呢。一般情况是通过hash(key)%len获得，也就是元素的key的哈希值对数组长度取模得到。比如上述哈希表中，12%16=12,28%16=12,108%16=12,140%16=12。所以12、28、108以及140都存储在数组下标为12的位置。</li>
+                            <li>HashMap其实也是一个线性的数组实现的,所以可以理解为其存储数据的容器就是一个线性数组。这可能让我们很不解，一个线性的数组怎么实现按键值对来存取数据呢？这里HashMap有做一些处理。</li>
                             <li>
-                                meepo是阿里GTS的一个开源实现，按GTS的流程实现各功能模块，同时限制条件也类似。比如事务里的表必须有主键；保证所有框架事务管理范围内的数据，都不会被框架管理范围外的系统所修改。GTS链接：https://help.aliyun.com/document_detail/56746.html?spm=a2c4g.11186623.6.589.cdEaX4
+                                首先HashMap里面实现一个静态内部类Entry，其重要的属性有 key , value, next，从属性key,value我们就能很明显的看出来Entry就是HashMap键值对实现的一个基础bean，我们上面说到HashMap的基础就是一个线性数组，这个数组就是Entry[]，Map里面的内容都保存在Entry[]里面。
                             </li>
                             <li>
-                                meepo的全局锁表中存储了记录的加锁信息。封锁的粒度是行（记录），锁的类型包括共享锁和互斥锁，对于同一个记录，加锁的规则是共享锁与共享锁不冲突，共享锁与互斥锁冲突、互斥锁与互斥锁冲突。对插入(INSERT)、修改(UPDATE)、删除(DELETE)、更新模式的锁定查询(SELECT…
-                                FOR UPDATE) 操作加互斥锁。对于共享模式的锁定查询 (SELECT…LOCK IN SHARE MODE)
-                                操作加共享锁。若没有锁冲突，在锁表中，增加一行记录，表示加锁成功。
+                                /**
+                                * The table, resized as necessary. Length MUST Always be a power of two.
+                                */
+                                transient Entry[] table;
                             </li>
                         </ul>
 
@@ -92,18 +92,15 @@
                 <div class="widget">
                     <div class="widget-title"><i class="fa fa-file-o"> 最近文章</i></div>
                     <ul class="post-list">
-                        <li class="post-list-item"><a class="post-list-link" href="/2018/08/01/start/two/">meepo源码解析系列(二)之环境搭建</a>
+                        <li class="post-list-item"><a class="post-list-link" href="/2018/08/01/start/two/">jdk源码(二)之hashmap</a>
                         </li>
-                        <li class="post-list-item"><a class="post-list-link" href="/2018/08/04/base/one/">meepo源码解析系列(三)之框架架构</a>
+                        <li class="post-list-item"><a class="post-list-link" href="/2018/08/01/start/two/">jdk源码(三)之hashmap</a>
                         </li>
-                        <li class="post-list-item"><a class="post-list-link" href="/2018/08/04/base/two/">meepo源码解析系列(四)之启动详解</a>
+                        <li class="post-list-item"><a class="post-list-link" href="/2018/08/01/start/two/">jdk源码(四)之hashmap</a>
                         </li>
-                        <li class="post-list-item"><a class="post-list-link" href="/2018/08/04/base/three/">meepo源码解析系列(五)之项目实战</a>
+                        <li class="post-list-item"><a class="post-list-link" href="/2018/08/01/start/two/">jdk源码(五)之hashmap</a>
                         </li>
-                        <li class="post-list-item"><a class="post-list-link" href="/2018/08/09/dubbo/one/">meepo源码解析系列(六)之项目实战</a>
-                        </li>
-
-                        <li class="post-list-item"><a class="post-list-link" href="/2018/08/09/dubbo/two/">meepo源码解析系列(七)之项目实战</a>
+                        <li class="post-list-item"><a class="post-list-link" href="/2018/08/01/start/two/">jdk源码(六)之hashmap</a>
                         </li>
                         <!--<li class="post-list-item"><a class="post-list-link" href="/2018/08/01/meepo/two/">meepo源码解析系列(二)之环境搭建</a>-->
                         <!--</li>-->
