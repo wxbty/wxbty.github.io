@@ -20,7 +20,6 @@
 </head>
 <body>
 <div class="body_container">
-
     <div id="cnblogs_post_body" class="blogpost-body"><h1>一、概述</h1>
         <p>　　谈到并发，不得不谈ReentrantLock；而谈到ReentrantLock，不得不谈AbstractQueuedSynchronizer（AQS）！</p>
         <p>　　类如其名，抽象的队列式的同步器，AQS定义了一套多线程访问共享资源的同步器框架，许多同步类实现都依赖于它，如常用的ReentrantLock/Semaphore/CountDownLatch...。</p>
@@ -90,7 +89,26 @@
         <p>　　这里之所以没有定义成abstract，是因为独占模式下只用实现tryAcquire-tryRelease，而共享模式下只用实现tryAcquireShared-tryReleaseShared。如果都定义成abstract，那么每个模式也要去实现另一模式下的接口。说到底，Doug Lea还是站在咱们开发者的角度，尽量减少不必要的工作量。</p>
         <h3>3.1.2 addWaiter(Node)</h3>
         <p>　　此方法用于将当前线程加入到等待队列的队尾，并返回当前线程所在的结点。还是上源码吧：</p>
-        <div class="cnblogs_code"><div>按 Ctrl+C 复制代码</div><textarea style="width: 1056px; height: 308.8px; font-family: &quot;Courier New&quot;; font-size: 12px; line-height: 1.5;"></textarea><div>按 Ctrl+C 复制代码</div></div>
+        <div class="cnblogs_code"><div class="cnblogs_code_toolbar"><span class="cnblogs_code_copy"><a href="javascript:void(0);" onclick="copyCnblogsCode(this)" title="复制代码"><img src="//common.cnblogs.com/images/copycode.gif" alt="复制代码"></a></span></div>
+            <pre><span style="color: #008080;"> 1</span> <span style="color: #0000ff;">private</span><span style="color: #000000;"> Node addWaiter(Node mode) {
+</span><span style="color: #008080;"> 2</span>     <span style="color: #008000;">//</span><span style="color: #008000;">以给定模式构造结点。mode有两种：EXCLUSIVE（独占）和SHARED（共享）</span>
+<span style="color: #008080;"> 3</span>     Node node = <span style="color: #0000ff;">new</span><span style="color: #000000;"> Node(Thread.currentThread(), mode);
+</span><span style="color: #008080;"> 4</span>
+<span style="color: #008080;"> 5</span>     <span style="color: #008000;">//</span><span style="color: #008000;">尝试快速方式直接放到队尾。</span>
+<span style="color: #008080;"> 6</span>     Node pred =<span style="color: #000000;"> tail;
+</span><span style="color: #008080;"> 7</span>     <span style="color: #0000ff;">if</span> (pred != <span style="color: #0000ff;">null</span><span style="color: #000000;">) {
+</span><span style="color: #008080;"> 8</span>         node.prev =<span style="color: #000000;"> pred;
+</span><span style="color: #008080;"> 9</span>         <span style="color: #0000ff;">if</span><span style="color: #000000;"> (compareAndSetTail(pred, node)) {
+</span><span style="color: #008080;">10</span>             pred.next =<span style="color: #000000;"> node;
+</span><span style="color: #008080;">11</span>             <span style="color: #0000ff;">return</span><span style="color: #000000;"> node;
+</span><span style="color: #008080;">12</span> <span style="color: #000000;">        }
+</span><span style="color: #008080;">13</span> <span style="color: #000000;">    }
+</span><span style="color: #008080;">14</span>
+<span style="color: #008080;">15</span>     <span style="color: #008000;">//</span><span style="color: #008000;">上一步失败则通过enq入队。</span>
+<span style="color: #008080;">16</span> <span style="color: #000000;">    enq(node);
+</span><span style="color: #008080;">17</span>     <span style="color: #0000ff;">return</span><span style="color: #000000;"> node;
+</span><span style="color: #008080;">18</span> }</pre>
+            <div class="cnblogs_code_toolbar"><span class="cnblogs_code_copy"><a href="javascript:void(0);" onclick="copyCnblogsCode(this)" title="复制代码"><img src="//common.cnblogs.com/images/copycode.gif" alt="复制代码"></a></span></div></div>
         <p>&nbsp;不用再说了，直接看注释吧。这里我们说下Node。Node结点是对每一个访问同步代码的线程的封装，其包含了需要同步的线程本身以及线程的状态，如是否被阻塞，是否等待唤醒，是否已经被取消等。变量waitStatus则表示当前被封装成Node结点的等待状态，共有4种取值CANCELLED、SIGNAL、CONDITION、PROPAGATE。</p>
         <ul>
             <li>
@@ -112,7 +130,7 @@
         <p>AQS在判断状态时，通过用waitStatus&gt;0表示取消状态，而waitStatus&lt;0表示有效状态。</p>
         <h4>3.1.2.1 enq(Node)</h4>
         <p>&nbsp;　　此方法用于将node加入队尾。源码如下：</p>
-        <div class="cnblogs_code"><div class="cnblogs_code_toolbar">   </div>
+        <div class="cnblogs_code"><div class="cnblogs_code_toolbar"><span class="cnblogs_code_copy"><a href="javascript:void(0);" onclick="copyCnblogsCode(this)" title="复制代码"><img src="//common.cnblogs.com/images/copycode.gif" alt="复制代码"></a></span></div>
             <pre><span style="color: #008080;"> 1</span> <span style="color: #0000ff;">private</span> Node enq(<span style="color: #0000ff;">final</span><span style="color: #000000;"> Node node) {
 </span><span style="color: #008080;"> 2</span>     <span style="color: #008000;">//</span><span style="color: #008000;">CAS"自旋"，直到成功加入队尾</span>
 <span style="color: #008080;"> 3</span>     <span style="color: #0000ff;">for</span><span style="color: #000000;"> (;;) {
@@ -129,12 +147,12 @@
 </span><span style="color: #008080;">14</span> <span style="color: #000000;">        }
 </span><span style="color: #008080;">15</span> <span style="color: #000000;">    }
 </span><span style="color: #008080;">16</span> }</pre>
-            <div class="cnblogs_code_toolbar">   </div></div>
+            <div class="cnblogs_code_toolbar"><span class="cnblogs_code_copy"><a href="javascript:void(0);" onclick="copyCnblogsCode(this)" title="复制代码"><img src="//common.cnblogs.com/images/copycode.gif" alt="复制代码"></a></span></div></div>
         <p>&nbsp;</p>
         <p>如果你看过AtomicInteger.getAndIncrement()函数源码，那么相信你一眼便看出这段代码的精华。<span style="color: #0000ff; background-color: #ffffff;"><strong>CAS自旋volatile变量</strong></span>，是一种很经典的用法。还不太了解的，自己去百度一下吧。</p>
         <h3>3.1.3&nbsp;acquireQueued(Node, int)</h3>
         <p>　　OK，通过tryAcquire()和addWaiter()，该线程获取资源失败，已经被放入等待队列尾部了。聪明的你立刻应该能想到该线程下一部该干什么了吧：<span style="color: #0000ff;"><strong>进入等待状态休息，直到其他线程彻底释放资源后唤醒自己，自己再拿到资源，然后就可以去干自己想干的事了</strong></span>。没错，就是这样！是不是跟医院排队拿号有点相似~~acquireQueued()就是干这件事：<strong><span style="color: #0000ff;">在等待队列中排队拿号（中间没其它事干可以休息），直到拿到号后再返回</span></strong>。这个函数非常关键，还是上源码吧：</p>
-        <div class="cnblogs_code"><div class="cnblogs_code_toolbar">   </div>
+        <div class="cnblogs_code"><div class="cnblogs_code_toolbar"><span class="cnblogs_code_copy"><a href="javascript:void(0);" onclick="copyCnblogsCode(this)" title="复制代码"><img src="//common.cnblogs.com/images/copycode.gif" alt="复制代码"></a></span></div>
             <pre><span style="color: #008080;"> 1</span> <span style="color: #0000ff;">final</span> <span style="color: #0000ff;">boolean</span> acquireQueued(<span style="color: #0000ff;">final</span> Node node, <span style="color: #0000ff;">int</span><span style="color: #000000;"> arg) {
 </span><span style="color: #008080;"> 2</span>     <span style="color: #0000ff;">boolean</span> failed = <span style="color: #0000ff;">true</span>;<span style="color: #008000;">//</span><span style="color: #008000;">标记是否成功拿到资源</span>
 <span style="color: #008080;"> 3</span>     <span style="color: #0000ff;">try</span><span style="color: #000000;"> {
@@ -161,12 +179,12 @@
 </span><span style="color: #008080;">24</span> <span style="color: #000000;">            cancelAcquire(node);
 </span><span style="color: #008080;">25</span> <span style="color: #000000;">    }
 </span><span style="color: #008080;">26</span> }</pre>
-            <div class="cnblogs_code_toolbar">   </div></div>
+            <div class="cnblogs_code_toolbar"><span class="cnblogs_code_copy"><a href="javascript:void(0);" onclick="copyCnblogsCode(this)" title="复制代码"><img src="//common.cnblogs.com/images/copycode.gif" alt="复制代码"></a></span></div></div>
         <p>&nbsp;</p>
         <p>到这里了，我们先不急着总结acquireQueued()的函数流程，先看看shouldParkAfterFailedAcquire()和parkAndCheckInterrupt()具体干些什么。</p>
         <h4>3.1.3.1 shouldParkAfterFailedAcquire(Node, Node)</h4>
         <p>　　此方法主要用于检查状态，看看自己是否真的可以去休息了（进入waiting状态，如果线程状态转换不熟，可以参考本人上一篇写的<span style="color: #0000ff;"><a id="cb_post_title_url" class="postTitle2" href="http://www.cnblogs.com/waterystone/p/4920007.html" target="_blank"><span style="color: #0000ff;">Thread详解</span></a></span>），万一队列前边的线程都放弃了只是瞎站着，那也说不定，对吧！</p>
-        <div class="cnblogs_code"><div class="cnblogs_code_toolbar">   </div>
+        <div class="cnblogs_code"><div class="cnblogs_code_toolbar"><span class="cnblogs_code_copy"><a href="javascript:void(0);" onclick="copyCnblogsCode(this)" title="复制代码"><img src="//common.cnblogs.com/images/copycode.gif" alt="复制代码"></a></span></div>
             <pre><span style="color: #008080;"> 1</span> <span style="color: #0000ff;">private</span> <span style="color: #0000ff;">static</span> <span style="color: #0000ff;">boolean</span><span style="color: #000000;"> shouldParkAfterFailedAcquire(Node pred, Node node) {
 </span><span style="color: #008080;"> 2</span>     <span style="color: #0000ff;">int</span> ws = pred.waitStatus;<span style="color: #008000;">//</span><span style="color: #008000;">拿到前驱的状态</span>
 <span style="color: #008080;"> 3</span>     <span style="color: #0000ff;">if</span> (ws ==<span style="color: #000000;"> Node.SIGNAL)
@@ -187,7 +205,7 @@
 </span><span style="color: #008080;">18</span> <span style="color: #000000;">    }
 </span><span style="color: #008080;">19</span>     <span style="color: #0000ff;">return</span> <span style="color: #0000ff;">false</span><span style="color: #000000;">;
 </span><span style="color: #008080;">20</span> }</pre>
-            <div class="cnblogs_code_toolbar">   </div></div>
+            <div class="cnblogs_code_toolbar"><span class="cnblogs_code_copy"><a href="javascript:void(0);" onclick="copyCnblogsCode(this)" title="复制代码"><img src="//common.cnblogs.com/images/copycode.gif" alt="复制代码"></a></span></div></div>
         <p>&nbsp;</p>
         <p>整个流程中，如果前驱结点的状态不是SIGNAL，那么自己就不能安心去休息，需要去找个安心的休息点，同时可以再尝试下看有没有机会轮到自己拿号。</p>
         <h4>3.1.3.2 parkAndCheckInterrupt()</h4>
@@ -229,7 +247,7 @@
         <p>&nbsp;</p>
         <h2>3.2 release(int)</h2>
         <p>&nbsp;　　上一小节已经把acquire()说完了，这一小节就来讲讲它的反操作release()吧。此方法是独占模式下线程释放共享资源的顶层入口。它会释放指定量的资源，如果彻底释放了（即state=0）,它会唤醒等待队列里的其他线程来获取资源。这也正是unlock()的语义，当然不仅仅只限于unlock()。下面是release()的源码：</p>
-        <div class="cnblogs_code"><div class="cnblogs_code_toolbar">   </div>
+        <div class="cnblogs_code"><div class="cnblogs_code_toolbar"><span class="cnblogs_code_copy"><a href="javascript:void(0);" onclick="copyCnblogsCode(this)" title="复制代码"><img src="//common.cnblogs.com/images/copycode.gif" alt="复制代码"></a></span></div>
             <pre><span style="color: #008080;">1</span> <span style="color: #0000ff;">public</span> <span style="color: #0000ff;">final</span> <span style="color: #0000ff;">boolean</span> release(<span style="color: #0000ff;">int</span><span style="color: #000000;"> arg) {
 </span><span style="color: #008080;">2</span>     <span style="color: #0000ff;">if</span><span style="color: #000000;"> (tryRelease(arg)) {
 </span><span style="color: #008080;">3</span>         Node h = head;<span style="color: #008000;">//</span><span style="color: #008000;">找到头结点</span>
@@ -239,7 +257,7 @@
 </span><span style="color: #008080;">7</span> <span style="color: #000000;">    }
 </span><span style="color: #008080;">8</span>     <span style="color: #0000ff;">return</span> <span style="color: #0000ff;">false</span><span style="color: #000000;">;
 </span><span style="color: #008080;">9</span> }</pre>
-            <div class="cnblogs_code_toolbar">   </div></div>
+            <div class="cnblogs_code_toolbar"><span class="cnblogs_code_copy"><a href="javascript:void(0);" onclick="copyCnblogsCode(this)" title="复制代码"><img src="//common.cnblogs.com/images/copycode.gif" alt="复制代码"></a></span></div></div>
         <p>&nbsp;</p>
         <p>　　逻辑并不复杂。它调用tryRelease()来释放资源。有一点需要注意的是，<span style="color: #0000ff;"><strong>它是根据tryRelease()的返回值来判断该线程是否已经完成释放掉资源了！所以自定义同步器在设计tryRelease()的时候要明确这一点！！</strong></span></p>
         <h3>3.2.1 tryRelease(int)</h3>
@@ -253,7 +271,7 @@
         <p>　　跟tryAcquire()一样，这个方法是需要独占模式的自定义同步器去实现的。正常来说，tryRelease()都会成功的，因为这是独占模式，该线程来释放资源，那么它肯定已经拿到独占资源了，直接减掉相应量的资源即可(state-=arg)，也不需要考虑线程安全的问题。但要注意它的返回值，上面已经提到了，<strong><span style="color: #0000ff;">release()是根据tryRelease()的返回值来判断该线程是否已经完成释放掉资源了！</span></strong>所以自义定同步器在实现时，如果已经彻底释放资源(state=0)，要返回true，否则返回false。</p>
         <h3>3.2.2 unparkSuccessor(Node)</h3>
         <p>　　此方法用于唤醒等待队列中下一个线程。下面是源码：</p>
-        <div class="cnblogs_code"><div class="cnblogs_code_toolbar">   </div>
+        <div class="cnblogs_code"><div class="cnblogs_code_toolbar"><span class="cnblogs_code_copy"><a href="javascript:void(0);" onclick="copyCnblogsCode(this)" title="复制代码"><img src="//common.cnblogs.com/images/copycode.gif" alt="复制代码"></a></span></div>
             <pre><span style="color: #008080;"> 1</span> <span style="color: #0000ff;">private</span> <span style="color: #0000ff;">void</span><span style="color: #000000;"> unparkSuccessor(Node node) {
 </span><span style="color: #008080;"> 2</span>     <span style="color: #008000;">//</span><span style="color: #008000;">这里，node一般为当前线程所在的结点。</span>
 <span style="color: #008080;"> 3</span>     <span style="color: #0000ff;">int</span> ws =<span style="color: #000000;"> node.waitStatus;
@@ -270,7 +288,7 @@
 </span><span style="color: #008080;">14</span>     <span style="color: #0000ff;">if</span> (s != <span style="color: #0000ff;">null</span><span style="color: #000000;">)
 </span><span style="color: #008080;">15</span>         LockSupport.unpark(s.thread);<span style="color: #008000;">//</span><span style="color: #008000;">唤醒</span>
 <span style="color: #008080;">16</span> }</pre>
-            <div class="cnblogs_code_toolbar">   </div></div>
+            <div class="cnblogs_code_toolbar"><span class="cnblogs_code_copy"><a href="javascript:void(0);" onclick="copyCnblogsCode(this)" title="复制代码"><img src="//common.cnblogs.com/images/copycode.gif" alt="复制代码"></a></span></div></div>
         <p>&nbsp;</p>
         <p>　　这个函数并不复杂。一句话概括：<strong><span style="color: #0000ff;">用unpark()唤醒等待队列中最前边的那个未放弃线程</span></strong>，这里我们也用s来表示吧。此时，再和acquireQueued()联系起来，s被唤醒后，进入if (p == head &amp;&amp; tryAcquire(arg))的判断（即使p!=head也没关系，它会再进入shouldParkAfterFailedAcquire()寻找一个安全点。这里既然s已经是等待队列中最前边的那个未放弃线程了，那么通过shouldParkAfterFailedAcquire()的调整，s也必然会跑到head的next结点，下一次自旋p==head就成立啦），然后s把自己设置成head标杆结点，表示自己已经获取到资源了，acquire()也返回了！！And then, DO what you WANT!</p>
         <h3>3.2.3 小结</h3>
@@ -293,7 +311,7 @@
         </ol>
         <h3>3.3.1 doAcquireShared(int)</h3>
         <p>　　此方法用于将当前线程加入等待队列尾部休息，直到其他线程释放资源唤醒自己，自己成功拿到相应量的资源后才返回。下面是doAcquireShared()的源码：</p>
-        <div class="cnblogs_code"><div class="cnblogs_code_toolbar">   </div>
+        <div class="cnblogs_code"><div class="cnblogs_code_toolbar"><span class="cnblogs_code_copy"><a href="javascript:void(0);" onclick="copyCnblogsCode(this)" title="复制代码"><img src="//common.cnblogs.com/images/copycode.gif" alt="复制代码"></a></span></div>
             <pre><span style="color: #008080;"> 1</span> <span style="color: #0000ff;">private</span> <span style="color: #0000ff;">void</span> doAcquireShared(<span style="color: #0000ff;">int</span><span style="color: #000000;"> arg) {
 </span><span style="color: #008080;"> 2</span>     <span style="color: #0000ff;">final</span> Node node = addWaiter(Node.SHARED);<span style="color: #008000;">//</span><span style="color: #008000;">加入队列尾部</span>
 <span style="color: #008080;"> 3</span>     <span style="color: #0000ff;">boolean</span> failed = <span style="color: #0000ff;">true</span>;<span style="color: #008000;">//</span><span style="color: #008000;">是否成功标志</span>
@@ -323,13 +341,13 @@
 </span><span style="color: #008080;">27</span> <span style="color: #000000;">            cancelAcquire(node);
 </span><span style="color: #008080;">28</span> <span style="color: #000000;">    }
 </span><span style="color: #008080;">29</span> }</pre>
-            <div class="cnblogs_code_toolbar">   </div></div>
+            <div class="cnblogs_code_toolbar"><span class="cnblogs_code_copy"><a href="javascript:void(0);" onclick="copyCnblogsCode(this)" title="复制代码"><img src="//common.cnblogs.com/images/copycode.gif" alt="复制代码"></a></span></div></div>
         <p>&nbsp;</p>
         <p>　　有木有觉得跟acquireQueued()很相似？对，其实流程并没有太大区别。只不过这里将补中断的selfInterrupt()放到doAcquireShared()里了，而独占模式是放到acquireQueued()之外，其实都一样，不知道Doug Lea是怎么想的。</p>
         <p>　　跟独占模式比，还有一点需要注意的是，这里只有线程是head.next时（“老二”），才会去尝试获取资源，有剩余的话还会唤醒之后的队友。那么问题就来了，假如老大用完后释放了5个资源，而老二需要6个，老三需要1个，老四需要2个。老大先唤醒老二，老二一看资源不够，他是把资源让给老三呢，还是不让？答案是否定的！老二会继续park()等待其他线程释放资源，也更不会去唤醒老三和老四了。独占模式，同一时刻只有一个线程去执行，这样做未尝不可；但共享模式下，多个线程是可以同时执行的，现在因为老二的资源需求量大，而把后面量小的老三和老四也都卡住了。当然，这并不是问题，只是AQS保证严格按照入队顺序唤醒罢了（保证公平，但降低了并发）。</p>
         <p>&nbsp;</p>
         <h4>3.3.1.1 setHeadAndPropagate(Node, int)</h4>
-        <div class="cnblogs_code"><div class="cnblogs_code_toolbar">   </div>
+        <div class="cnblogs_code"><div class="cnblogs_code_toolbar"><span class="cnblogs_code_copy"><a href="javascript:void(0);" onclick="copyCnblogsCode(this)" title="复制代码"><img src="//common.cnblogs.com/images/copycode.gif" alt="复制代码"></a></span></div>
             <pre><span style="color: #008080;"> 1</span> <span style="color: #0000ff;">private</span> <span style="color: #0000ff;">void</span> setHeadAndPropagate(Node node, <span style="color: #0000ff;">int</span><span style="color: #000000;"> propagate) {
 </span><span style="color: #008080;"> 2</span>     Node h =<span style="color: #000000;"> head;
 </span><span style="color: #008080;"> 3</span>     setHead(node);<span style="color: #008000;">//</span><span style="color: #008000;">head指向自己
@@ -340,7 +358,7 @@
 </span><span style="color: #008080;"> 8</span> <span style="color: #000000;">            doReleaseShared();
 </span><span style="color: #008080;"> 9</span> <span style="color: #000000;">    }
 </span><span style="color: #008080;">10</span> }</pre>
-            <div class="cnblogs_code_toolbar">   </div></div>
+            <div class="cnblogs_code_toolbar"><span class="cnblogs_code_copy"><a href="javascript:void(0);" onclick="copyCnblogsCode(this)" title="复制代码"><img src="//common.cnblogs.com/images/copycode.gif" alt="复制代码"></a></span></div></div>
         <p>&nbsp;</p>
         <p>　　此方法在setHead()的基础上多了一步，就是自己苏醒的同时，如果条件符合（比如还有剩余资源），还会去唤醒后继结点，毕竟是共享模式！</p>
         <p>　　doReleaseShared()我们留着下一小节的releaseShared()里来讲。</p>
@@ -356,7 +374,7 @@
         <p>　　其实跟acquire()的流程大同小异，只不过多了个<span style="color: #0000ff;"><strong>自己拿到资源后，还会去唤醒后继队友的操作（这才是共享嘛）</strong></span>。</p>
         <h2>3.4&nbsp;releaseShared()</h2>
         <p>　　上一小节已经把acquireShared()说完了，这一小节就来讲讲它的反操作releaseShared()吧。此方法是共享模式下线程释放共享资源的顶层入口。它会释放指定量的资源，如果成功释放且允许唤醒等待线程，它会唤醒等待队列里的其他线程来获取资源。下面是releaseShared()的源码：</p>
-        <div class="cnblogs_code"><div class="cnblogs_code_toolbar">   </div>
+        <div class="cnblogs_code"><div class="cnblogs_code_toolbar"><span class="cnblogs_code_copy"><a href="javascript:void(0);" onclick="copyCnblogsCode(this)" title="复制代码"><img src="//common.cnblogs.com/images/copycode.gif" alt="复制代码"></a></span></div>
             <pre><span style="color: #008080;">1</span> <span style="color: #0000ff;">public</span> <span style="color: #0000ff;">final</span> <span style="color: #0000ff;">boolean</span> releaseShared(<span style="color: #0000ff;">int</span><span style="color: #000000;"> arg) {
 </span><span style="color: #008080;">2</span>     <span style="color: #0000ff;">if</span> (tryReleaseShared(arg)) {<span style="color: #008000;">//</span><span style="color: #008000;">尝试释放资源</span>
 <span style="color: #008080;">3</span>         doReleaseShared();<span style="color: #008000;">//</span><span style="color: #008000;">唤醒后继结点</span>
@@ -364,12 +382,12 @@
 </span><span style="color: #008080;">5</span> <span style="color: #000000;">    }
 </span><span style="color: #008080;">6</span>     <span style="color: #0000ff;">return</span> <span style="color: #0000ff;">false</span><span style="color: #000000;">;
 </span><span style="color: #008080;">7</span> }</pre>
-            <div class="cnblogs_code_toolbar">   </div></div>
+            <div class="cnblogs_code_toolbar"><span class="cnblogs_code_copy"><a href="javascript:void(0);" onclick="copyCnblogsCode(this)" title="复制代码"><img src="//common.cnblogs.com/images/copycode.gif" alt="复制代码"></a></span></div></div>
         <p>&nbsp;</p>
         <p>　　此方法的流程也比较简单，一句话：<span style="color: #0000ff;">释放掉资源后，唤醒后继</span>。跟独占模式下的release()相似，但有一点稍微需要注意：独占模式下的tryRelease()在完全释放掉资源（state=0）后，才会返回true去唤醒其他线程，这主要是基于独占下可重入的考量；而共享模式下的releaseShared()则没有这种要求，共享模式实质就是控制一定量的线程并发执行，那么拥有资源的线程在释放掉部分资源时就可以唤醒后继等待结点。例如，资源总量是13，A（5）和B（7）分别获取到资源并发运行，C（4）来时只剩1个资源就需要等待。A在运行过程中释放掉2个资源量，然后tryReleaseShared(2)返回true唤醒C，C一看只有3个仍不够继续等待；随后B又释放2个，tryReleaseShared(2)返回true唤醒C，C一看有5个够自己用了，然后C就可以跟A和B一起运行。而ReentrantReadWriteLock读锁的tryReleaseShared()只有在完全释放掉资源（state=0）才返回true，所以自定义同步器可以根据需要决定tryReleaseShared()的返回值。</p>
         <h3>3.4.1&nbsp;doReleaseShared()</h3>
         <p>　　此方法主要用于唤醒后继。下面是它的源码：</p>
-        <div class="cnblogs_code"><div class="cnblogs_code_toolbar">   </div>
+        <div class="cnblogs_code"><div class="cnblogs_code_toolbar"><span class="cnblogs_code_copy"><a href="javascript:void(0);" onclick="copyCnblogsCode(this)" title="复制代码"><img src="//common.cnblogs.com/images/copycode.gif" alt="复制代码"></a></span></div>
             <pre><span style="color: #008080;"> 1</span> <span style="color: #0000ff;">private</span> <span style="color: #0000ff;">void</span><span style="color: #000000;"> doReleaseShared() {
 </span><span style="color: #008080;"> 2</span>     <span style="color: #0000ff;">for</span><span style="color: #000000;"> (;;) {
 </span><span style="color: #008080;"> 3</span>         Node h =<span style="color: #000000;"> head;
@@ -388,7 +406,7 @@
 <span style="color: #008080;">16</span>             <span style="color: #0000ff;">break</span><span style="color: #000000;">;
 </span><span style="color: #008080;">17</span> <span style="color: #000000;">    }
 </span><span style="color: #008080;">18</span> }</pre>
-            <div class="cnblogs_code_toolbar">   </div></div>
+            <div class="cnblogs_code_toolbar"><span class="cnblogs_code_copy"><a href="javascript:void(0);" onclick="copyCnblogsCode(this)" title="复制代码"><img src="//common.cnblogs.com/images/copycode.gif" alt="复制代码"></a></span></div></div>
         <p>&nbsp;</p>
         <p>&nbsp;</p>
         <h2>3.5 小结</h2>
@@ -407,7 +425,7 @@
         <p>　　OK，下面我们就以AQS源码里的Mutex为例，讲一下AQS的简单应用。</p>
         <h2>4.1 Mutex（互斥锁）</h2>
         <p>　　Mutex是一个不可重入的互斥锁实现。锁资源（AQS里的state）只有两种状态：0表示未锁定，1表示锁定。下边是Mutex的核心源码：</p>
-        <div class="cnblogs_code"><div class="cnblogs_code_toolbar">   </div>
+        <div class="cnblogs_code"><div class="cnblogs_code_toolbar"><span class="cnblogs_code_copy"><a href="javascript:void(0);" onclick="copyCnblogsCode(this)" title="复制代码"><img src="//common.cnblogs.com/images/copycode.gif" alt="复制代码"></a></span></div>
             <pre><span style="color: #008080;"> 1</span> <span style="color: #0000ff;">class</span> Mutex <span style="color: #0000ff;">implements</span><span style="color: #000000;"> Lock, java.io.Serializable {
 </span><span style="color: #008080;"> 2</span>     <span style="color: #008000;">//</span><span style="color: #008000;"> 自定义同步器</span>
 <span style="color: #008080;"> 3</span>     <span style="color: #0000ff;">private</span> <span style="color: #0000ff;">static</span> <span style="color: #0000ff;">class</span> Sync <span style="color: #0000ff;">extends</span><span style="color: #000000;"> AbstractQueuedSynchronizer {
@@ -460,11 +478,12 @@
 </span><span style="color: #008080;">50</span>         <span style="color: #0000ff;">return</span><span style="color: #000000;"> sync.isHeldExclusively();
 </span><span style="color: #008080;">51</span> <span style="color: #000000;">    }
 </span><span style="color: #008080;">52</span> }</pre>
-            <div class="cnblogs_code_toolbar">   </div></div>
+            <div class="cnblogs_code_toolbar"><span class="cnblogs_code_copy"><a href="javascript:void(0);" onclick="copyCnblogsCode(this)" title="复制代码"><img src="//common.cnblogs.com/images/copycode.gif" alt="复制代码"></a></span></div></div>
         <p>&nbsp;</p>
         <p>　　同步类在实现时一般都将自定义同步器（sync）定义为内部类，供自己使用；而同步类自己（Mutex）则实现某个接口，对外服务。当然，接口的实现要直接依赖sync，它们在语义上也存在某种对应关系！！而sync只用实现资源state的获取-释放方式tryAcquire-tryRelelase，至于线程的排队、等待、唤醒等，上层的AQS都已经实现好了，我们不用关心。</p>
         <p>　　除了Mutex，ReentrantLock/CountDownLatch/Semphore这些同步类的实现方式都差不多，不同的地方就在获取-释放资源的方式tryAcquire-tryRelelase。掌握了这点，AQS的核心便被攻破了！</p>
         <p>　　OK，至此，整个AQS的讲解也要落下帷幕了。希望本文能够对学习Java并发编程的同学有所借鉴，中间写的有不对的地方，也欢迎讨论和指正~</p></div>
+
 </div>
 <script async src="//dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js">
 </script>
