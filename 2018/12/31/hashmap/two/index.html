@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8">
+    <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport">
+    <meta content="yes" name="apple-mobile-web-app-capable">
+    <meta content="black-translucent" name="apple-mobile-web-app-status-bar-style">
+    <meta content="telephone=no" name="format-detection">
+    <meta name="description" content="时间行者！">
+    <title>hashmap解析 | 飞过海</title>
+    <link rel="stylesheet" type="text/css" href="/css/style.css?v=0.0.0">
+    <link rel="stylesheet" type="text/css" href="//cdn.bootcss.com/normalize/7.0.0/normalize.min.css">
+    <link rel="stylesheet" type="text/css" href="//cdn.bootcss.com/pure/1.0.0/pure-min.css">
+    <link rel="stylesheet" type="text/css" href="//cdn.bootcss.com/pure/1.0.0/grids-responsive-min.css">
+    <link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css">
+    <script type="text/javascript" src="//cdn.bootcss.com/jquery/3.2.1/jquery.min.js"></script>
+    <link rel="Shortcut Icon" type="image/x-icon" href="/favicon.ico">
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+    <link rel="apple-touch-icon-precomposed" href="/apple-touch-icon.png">
+</head>
+<body>
+<div class="body_container">
+    <div id="header">
+        <div class="site-name"><h1 class="hidden">hashmap解析</h1><a id="logo" href="/">飞过海</a>
+            <p class="description">回到梦开始的地方！</p></div>
+        <div id="nav-menu"><a href="/2018/08/01/start/one" class="current"><i class="fa fa-home"> 首页</i></a><a
+                href="#"><i
+                class="fa fa-archive"> 归档</i></a><a href="/about/"><i class="fa fa-user"> 关于</i></a><a href="/atom.xml"><i
+                class="fa fa-rss"> 订阅</i></a></div>
+    </div>
+    <div id="layout" class="pure-g">
+        <div class="pure-u-1 pure-u-md-3-4">
+            <div class="content_container">
+                <div class="post"><h1 class="post-title">hashmap解析</h1>
+                    <div class="post-meta">Dec 31, 2018</div>
+                    <div class="post-content">
+
+                        <h3>3、hashmap的数据结构</h3>
+                        <p><img src="https://wxbty.github.io/images/hashmap/01.png" alt="数据结构"></p>
+                        <ul>
+                            <li>哈希表综合数组和链表的特性，是一种寻址容易，插入删除也容易的数据结构</li>
+                            <li>从上图我们可以发现哈希表是由数组+链表组成的，一个长度为16的数组中，每个元素存储的是一个链表的头结点。那么这些元素是按照什么样的规则存储到数组中呢。一般情况是通过hash(key)%len获得，也就是元素的key的哈希值对数组长度取模得到。比如上述哈希表中，12%16=12,28%16=12,108%16=12,140%16=12。所以12、28、108以及140都存储在数组下标为12的位置。</li>
+                            <li>HashMap其实也是一个线性的数组实现的,所以可以理解为其存储数据的容器就是一个线性数组。这可能让我们很不解，一个线性的数组怎么实现按键值对来存取数据呢？这里HashMap有做一些处理。</li>
+                            <li>
+                                首先HashMap里面实现一个静态内部类Entry，其重要的属性有 key , value, next，从属性key,value我们就能很明显的看出来Entry就是HashMap键值对实现的一个基础bean，我们上面说到HashMap的基础就是一个线性数组，这个数组就是Entry[]，Map里面的内容都保存在Entry[]里面。
+                            </li>
+                            <li>
+                                /**
+                                * The table, resized as necessary. Length MUST Always be a power of two.
+                                */
+                                transient Entry[] table;
+                            </li>
+                        </ul>
+
+                        <h3>2、hashmap的put及get原理</h3>
+                        <ul>
+                            <li>大致实现</li>
+                            <li>
+                                // 存储时:
+                                int hash = key.hashCode(); // 这个hashCode方法这里不详述,只要理解每个key的hash是一个固定的int值
+                                int index = hash % Entry[].length;
+                                Entry[index] = value;
+
+                                // 取值时:
+                                int hash = key.hashCode();
+                                int index = hash % Entry[].length;
+                                return Entry[index];
+                            </li>
+
+                        </ul>
+                        <ul>
+                            <li>put原理</li>
+                            <li>
+                                疑问：如果两个key通过hash%Entry[].length得到的index相同，会不会有覆盖的危险？
+                                　　这里HashMap里面用到链式数据结构的一个概念。上面我们提到过Entry类里面有一个
+                                next属性，作用是指向下一个Entry。打个比方， 第一个键值对A进来，通过计算其key的
+                                hash得到的index=0，记做:Entry[0] = A。一会后又进来一个键值对B，通过计算其index也等于0，
+                                现在怎么办？HashMap会这样做:B.next = A,Entry[0] = B,如果又进来C,index也等于0,那么
+                                C.next = B,Entry[0] = C；这样我们发现index=0的地方其实存取了A,B,C三个键值对,他们通过next
+                                这个属性链接在一起。所以疑问不用担心。也就是说数组中存储的是最后插入的元素。到这里为止，HashMap
+                                的大致实现，我们应该已经清楚了。
+                            </li>
+                            <li>这里回顾下第一个问题，链表的元素是头插还是尾插？</li>
+                            <li>单链表next=null的节点是尾节点，另一头则是头节点，按刚才的分析，hashmap链表新增节点，应该是头插。但是刚才的分析基于1.6的代码，在JDk1.8中，则改成了尾插</li>
+                            <li>看一下1.6中addEntry的关键代码片段</li>
+                            <p><img src="https://wxbty.github.io/images/hashmap/02.png" alt="jdk1.6新增节点"></p>
+                            <li>Entry构造函数</li>
+                            <p><img src="https://wxbty.github.io/images/hashmap/03.png" alt="jdk1.6新增节点"></p>
+                            <li>从构造方法中的nexrt=n(n是已有节点)可以看出确实是把原本的链表直接链在了新建的Entry对象的后边，可以断定是插入头部。</li>
+                            <li>1.8的hashmap，entry改成了node节点,putVal的关键代码如下</li>
+                            <p><img src="https://wxbty.github.io/images/hashmap/04.png" alt="jdk1.6新增节点"></p>
+                            <li>显然地看出，当到达链表尾部（即p是链表的最后一个节点）时，会用newNode方法建立一个新的节点插入尾部</li>
+                            <li>结论：jdk1.8中是插入的是链表尾部</li>
+
+                        </ul>
+                        <h3 id="项目结构"><a href="#项目结构" class="headerlink" title="项目结构"></a>项目结构</h3>
+                        <p><img src="https://wxbty.github.io/images/meepo/012.png" alt="结构图"></p>
+                        <ul>
+                            </li>
+                            <li><p><strong>meepo-core</strong> 该项目是JTA框架的核心实现，包括全局事务，XA资源，锁，事务镜像、定时清理等实现。</p>
+                            </li>
+                            <li><p><strong>meepo-supports</strong> 该项目是对核心组件的支持，包括jdbc、spring、切面的实现。</p>
+                            </li>
+                            <li><p><strong>meepo-supports-dubbo</strong>
+                                该项目是对dubbo框架的支持，里面主要针对dubbo的特性的实现,最主要对filter的spi扩展。
+                            </p>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="tags"></div>
+                    <div class="post-nav"><a href="/2018/12/31/hashmap/two" class="pre">hashmap解析(二)</a></div>
+                </div>
+            </div>
+        </div>
+        <div class="pure-u-1-4 hidden_mid_and_down">
+            <div id="sidebar">
+                <div class="widget">
+                    <form action="//www.google.com/search" method="get" accept-charset="utf-8" target="_blank"
+                          class="search-form"><input type="text" name="q" maxlength="20" placeholder="Search"/><input
+                            type="hidden" name="sitesearch" value="http://wxbty.github.io"/></form>
+                </div>
+                <div class="widget">
+                    <div class="widget-title"><i class="fa fa-file-o"> 最近文章</i></div>
+                    <ul class="post-list">
+                        <li class="post-list-item"><a class="post-list-link" href="/2018/08/01/start/two">jdk源码(二)之hashmap</a>
+                        </li>
+                        <li class="post-list-item"><a class="post-list-link" href="/2018/08/01/start/two">jdk源码(三)之hashmap</a>
+                        </li>
+                        <li class="post-list-item"><a class="post-list-link" href="/2018/08/01/start/two">jdk源码(四)之hashmap</a>
+                        </li>
+                        <li class="post-list-item"><a class="post-list-link" href="/2018/08/01/start/two">jdk源码(五)之hashmap</a>
+                        </li>
+                        <li class="post-list-item"><a class="post-list-link" href="/2018/08/01/start/two">jdk源码(六)之hashmap</a>
+                        </li>
+                        <!--<li class="post-list-item"><a class="post-list-link" href="/2018/08/01/meepo/two/">meepo源码解析系列(二)之环境搭建</a>-->
+                        <!--</li>-->
+                        <!--<li class="post-list-item"><a class="post-list-link" href="/2018/08/01/meepo/one/">meepo源码解析系列(一)之项目结构</a>-->
+                        <!--</li>-->
+                    </ul>
+                </div>
+                <div class="widget">
+                    <div class="widget-title"><i class="fa fa-external-link"> 友情链接</i></div>
+                    <ul></ul>
+                    <a href="https://github.com/wxbty" title="GitHub" target="_blank">GitHub</a>
+                    <ul></ul>
+                    <a href="http://www.iocoder.cn/" title="芋道源码" target="_blank">芋道源码</a></div>
+            </div>
+        </div>
+        <div class="pure-u-1 pure-u-md-3-4">
+            <div id="footer">Copyright © 2018 <a href="/" rel="nofollow">飞过海.</a> Powered by<a rel="nofollow"
+                                                                                               target="_blank"
+                                                                                               href="https://hexo.io">
+                Hexo.</a><a rel="nofollow" target="_blank" href="https://github.com/tufu9441/maupassant-hexo"> Theme</a>
+                by<a rel="nofollow" target="_blank" href="https://github.com/pagecho"> Cho.</a></div>
+        </div>
+    </div>
+    <a id="rocket" href="#top" class="show"></a>
+    <script type="text/javascript" src="/js/totop.js?v=0.0.0" async></script>
+    <script type="text/javascript" src="//cdn.bootcss.com/fancybox/3.1.20/jquery.fancybox.min.js" async></script>
+    <script type="text/javascript" src="/js/fancybox.js?v=0.0.0" async></script>
+    <link rel="stylesheet" type="text/css" href="//cdn.bootcss.com/fancybox/3.1.20/jquery.fancybox.min.css">
+    <script type="text/javascript" src="/js/codeblock-resizer.js?v=0.0.0"></script>
+    <script type="text/javascript" src="/js/smartresize.js?v=0.0.0"></script>
+</div>
+<script async src="//dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js">
+</script>
+<span id="busuanzi_container_site_pv">
+    本站总访问量<span id="busuanzi_value_site_pv"></span>次
+</span>
+<span id="busuanzi_container_site_uv">
+  本站访客数<span id="busuanzi_value_site_uv"></span>人次
+</span>
+
+</body>
+</html>

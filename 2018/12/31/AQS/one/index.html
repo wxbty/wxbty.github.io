@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8">
+    <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport">
+    <meta content="yes" name="apple-mobile-web-app-capable">
+    <meta content="black-translucent" name="apple-mobile-web-app-status-bar-style">
+    <meta content="telephone=no" name="format-detection">
+    <meta name="description" content="时间行者！">
+    <title>hashmap解析 | 飞过海</title>
+    <link rel="stylesheet" type="text/css" href="/css/style.css?v=0.0.0">
+    <link rel="stylesheet" type="text/css" href="//cdn.bootcss.com/normalize/7.0.0/normalize.min.css">
+    <link rel="stylesheet" type="text/css" href="//cdn.bootcss.com/pure/1.0.0/pure-min.css">
+    <link rel="stylesheet" type="text/css" href="//cdn.bootcss.com/pure/1.0.0/grids-responsive-min.css">
+    <link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css">
+    <script type="text/javascript" src="//cdn.bootcss.com/jquery/3.2.1/jquery.min.js"></script>
+    <link rel="Shortcut Icon" type="image/x-icon" href="/favicon.ico">
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+    <link rel="apple-touch-icon-precomposed" href="/apple-touch-icon.png">
+</head>
+<body>
+<div class="body_container">
+
+    <div id="cnblogs_post_body" class="blogpost-body"><h1>一、概述</h1>
+        <p>　　谈到并发，不得不谈ReentrantLock；而谈到ReentrantLock，不得不谈AbstractQueuedSynchronizer（AQS）！</p>
+        <p>　　类如其名，抽象的队列式的同步器，AQS定义了一套多线程访问共享资源的同步器框架，许多同步类实现都依赖于它，如常用的ReentrantLock/Semaphore/CountDownLatch...。</p>
+        <p>　　以下是本文的目录大纲：</p>
+        <ol>
+            <li style="list-style-type: none;"><ol>
+                <li>概述</li>
+                <li>框架</li>
+                <li>源码详解</li>
+                <li>简单应用</li>
+            </ol></li>
+        </ol>
+        <p>　　若有不正之处，请谅解和批评指正，不胜感激。</p>
+        <p>　　请尊重作者劳动成果，转载请标明原文链接：<span style="color: #0000ff;"><span style="color: #0000ff;"><a href="http://www.cnblogs.com/waterystone/p/4920797.html" target="_blank">http://www.cnblogs.com/waterystone/p/4920797.html</a></span></span></p>
+        <p><span style="color: #0000ff;"><span style="color: #0000ff;">　　<span style="background-color: #ffffff; color: #000000;">手机版可访问：<a href="https://mp.weixin.qq.com/s/eyZyzk8ZzjwzZYN4a4H5YA" target="_blank">https://mp.weixin.qq.com/s/eyZyzk8ZzjwzZYN4a4H5YA</a></span>　　</span></span></p>
+        <h1>二、框架</h1>
+        <p><img src="https://images2015.cnblogs.com/blog/721070/201705/721070-20170504110246211-10684485.png" alt=""></p>
+        <p>　　它维护了一个volatile int state（代表共享资源）和一个FIFO线程等待队列（多线程争用资源被阻塞时会进入此队列）。这里volatile是核心关键词，具体volatile的语义，在此不述。state的访问方式有三种:</p>
+        <ul>
+            <li>getState()</li>
+            <li>setState()</li>
+            <li>compareAndSetState()</li>
+        </ul>
+        <p>　　AQS定义两种资源共享方式：Exclusive（独占，只有一个线程能执行，如ReentrantLock）和Share（共享，多个线程可同时执行，如Semaphore/CountDownLatch）。</p>
+        <p>　　不同的自定义同步器争用共享资源的方式也不同。<span style="color: #0000ff;"><strong>自定义同步器在实现时只需要实现共享资源state的获取与释放方式即可</strong></span>，至于具体线程等待队列的维护（如获取资源失败入队/唤醒出队等），AQS已经在顶层实现好了。自定义同步器实现时主要实现以下几种方法：</p>
+        <ul>
+            <li>isHeldExclusively()：该线程是否正在独占资源。只有用到condition才需要去实现它。</li>
+            <li>tryAcquire(int)：独占方式。尝试获取资源，成功则返回true，失败则返回false。</li>
+            <li>tryRelease(int)：独占方式。尝试释放资源，成功则返回true，失败则返回false。</li>
+            <li>tryAcquireShared(int)：共享方式。尝试获取资源。负数表示失败；0表示成功，但没有剩余可用资源；正数表示成功，且有剩余资源。</li>
+            <li>tryReleaseShared(int)：共享方式。尝试释放资源，如果释放后允许唤醒后续等待结点返回true，否则返回false。</li>
+        </ul>
+        <p>　　以ReentrantLock为例，state初始化为0，表示未锁定状态。A线程lock()时，会调用tryAcquire()独占该锁并将state+1。此后，其他线程再tryAcquire()时就会失败，直到A线程unlock()到state=0（即释放锁）为止，其它线程才有机会获取该锁。当然，释放锁之前，A线程自己是可以重复获取此锁的（state会累加），这就是可重入的概念。但要注意，获取多少次就要释放多么次，这样才能保证state是能回到零态的。</p>
+        <p>　　再以CountDownLatch以例，任务分为N个子线程去执行，state也初始化为N（注意N要与线程个数一致）。这N个子线程是并行执行的，每个子线程执行完后countDown()一次，state会CAS减1。等到所有子线程都执行完后(即state=0)，会unpark()主调用线程，然后主调用线程就会从await()函数返回，继续后余动作。</p>
+        <p>　　一般来说，自定义同步器要么是独占方法，要么是共享方式，他们也只需实现tryAcquire-tryRelease、tryAcquireShared-tryReleaseShared中的一种即可。但AQS也支持自定义同步器同时实现独占和共享两种方式，如ReentrantReadWriteLock。</p>
+        <h1>三、源码详解</h1>
+        <p>　　本节开始讲解AQS的源码实现。依照acquire-release、acquireShared-releaseShared的次序来。</p>
+        <h2>3.1 acquire(int)</h2>
+        <p>　　此方法是独占模式下线程获取共享资源的顶层入口。如果获取到资源，线程直接返回，否则进入等待队列，直到获取到资源为止，<span style="color: #0000ff;">且整个过程忽略中断的影响</span>。这也正是lock()的语义，当然不仅仅只限于lock()。获取到资源后，线程就可以去执行其临界区代码了。<span style="line-height: 1.5;">下面是acquire()的源码：</span></p>
+        <div class="cnblogs_code">
+<pre><span style="color: #008080;">1</span> <span style="color: #0000ff;">public</span> <span style="color: #0000ff;">final</span> <span style="color: #0000ff;">void</span> acquire(<span style="color: #0000ff;">int</span><span style="color: #000000;"> arg) {
+</span><span style="color: #008080;">2</span>     <span style="color: #0000ff;">if</span> (!tryAcquire(arg) &amp;&amp;
+<span style="color: #008080;">3</span> <span style="color: #000000;">        acquireQueued(addWaiter(Node.EXCLUSIVE), arg))
+</span><span style="color: #008080;">4</span> <span style="color: #000000;">        selfInterrupt();
+</span><span style="color: #008080;">5</span> }</pre>
+        </div>
+        <p>&nbsp;</p>
+        <p>　　函数流程如下：</p>
+        <ol>
+            <li style="list-style-type: none;"><ol>
+                <li>tryAcquire()尝试直接去获取资源，如果成功则直接返回；</li>
+                <li>addWaiter()将该线程加入等待队列的尾部，并标记为独占模式；</li>
+                <li>acquireQueued()使线程在等待队列中获取资源，一直获取到资源后才返回。如果在整个等待过程中被中断过，则返回true，否则返回false。</li>
+                <li>如果线程在等待过程中被中断过，它是不响应的。只是获取资源后才再进行自我中断selfInterrupt()，将中断补上。</li>
+            </ol></li>
+        </ol>
+        <p>　　这时单凭这4个抽象的函数来看流程还有点朦胧，不要紧，看完接下来的分析后，你就会明白了。就像《大话西游》里唐僧说的：<span style="color: #ff0000;">等你明白了舍生取义的道理，你自然会回来和我唱这首歌的。</span></p>
+        <h3>3.1.1 tryAcquire(int)</h3>
+        <p>　　此方法尝试去获取独占资源。如果获取成功，则直接返回true，否则直接返回false。这也正是tryLock()的语义，还是那句话，当然不仅仅只限于tryLock()。如下是tryAcquire()的源码：</p>
+        <div class="cnblogs_code">
+<pre><span style="color: #008080;">1</span>     <span style="color: #0000ff;">protected</span> <span style="color: #0000ff;">boolean</span> tryAcquire(<span style="color: #0000ff;">int</span><span style="color: #000000;"> arg) {
+</span><span style="color: #008080;">2</span>         <span style="color: #0000ff;">throw</span> <span style="color: #0000ff;">new</span><span style="color: #000000;"> UnsupportedOperationException();
+</span><span style="color: #008080;">3</span>     }</pre>
+        </div>
+        <p>&nbsp;</p>
+        <p>　　什么？直接throw异常？说好的功能呢？好吧，<span style="color: #0000ff;"><strong>还记得概述里讲的AQS只是一个框架，具体资源的获取/释放方式交由自定义同步器去实现吗？</strong></span>就是这里了！！！AQS这里只定义了一个接口，具体资源的获取交由自定义同步器去实现了（通过state的get/set/CAS）！！！至于能不能重入，能不能加塞，那就看具体的自定义同步器怎么去设计了！！！当然，自定义同步器在进行资源访问时要考虑线程安全的影响。</p>
+        <p>　　这里之所以没有定义成abstract，是因为独占模式下只用实现tryAcquire-tryRelease，而共享模式下只用实现tryAcquireShared-tryReleaseShared。如果都定义成abstract，那么每个模式也要去实现另一模式下的接口。说到底，Doug Lea还是站在咱们开发者的角度，尽量减少不必要的工作量。</p>
+        <h3>3.1.2 addWaiter(Node)</h3>
+        <p>　　此方法用于将当前线程加入到等待队列的队尾，并返回当前线程所在的结点。还是上源码吧：</p>
+        <div class="cnblogs_code"><div>按 Ctrl+C 复制代码</div><textarea style="width: 1056px; height: 308.8px; font-family: &quot;Courier New&quot;; font-size: 12px; line-height: 1.5;"></textarea><div>按 Ctrl+C 复制代码</div></div>
+        <p>&nbsp;不用再说了，直接看注释吧。这里我们说下Node。Node结点是对每一个访问同步代码的线程的封装，其包含了需要同步的线程本身以及线程的状态，如是否被阻塞，是否等待唤醒，是否已经被取消等。变量waitStatus则表示当前被封装成Node结点的等待状态，共有4种取值CANCELLED、SIGNAL、CONDITION、PROPAGATE。</p>
+        <ul>
+            <li>
+                <p><span style="color: #be1921;">CANCELLED</span>：值为1，在同步队列中等待的线程等待超时或被中断，需要从同步队列中取消该Node的结点，其结点的waitStatus为CANCELLED，即结束状态，进入该状态后的结点将不会再变化。</p>
+            </li>
+            <li>
+                <p><span style="color: #be1921;">SIGNAL</span>：值为-1，被标识为该等待唤醒状态的后继结点，当其前继结点的线程释放了同步锁或被取消，将会通知该后继结点的线程执行。说白了，就是处于唤醒状态，只要前继结点释放锁，就会通知标识为SIGNAL状态的后继结点的线程执行。</p>
+            </li>
+            <li>
+                <p><span style="color: #be1921;">CONDITION</span>：值为-2，与Condition相关，该标识的结点处于<span style="color: #ff0000;"><strong>等待队列</strong></span>中，结点的线程等待在Condition上，当其他线程调用了Condition的signal()方法后，CONDITION状态的结点将<span style="color: #ff0000;"><strong>从等待队列转移到同步队列中</strong></span>，等待获取同步锁。</p>
+            </li>
+            <li>
+                <p><span style="color: #be1921;">PROPAGATE</span>：值为-3，与共享模式相关，在共享模式中，该状态标识结点的线程处于可运行状态。</p>
+            </li>
+            <li>
+                <p><span style="color: #be1921;">0状态</span>：值为0，代表初始化状态。</p>
+            </li>
+        </ul>
+        <p>AQS在判断状态时，通过用waitStatus&gt;0表示取消状态，而waitStatus&lt;0表示有效状态。</p>
+        <h4>3.1.2.1 enq(Node)</h4>
+        <p>&nbsp;　　此方法用于将node加入队尾。源码如下：</p>
+        <div class="cnblogs_code"><div class="cnblogs_code_toolbar">   </div>
+            <pre><span style="color: #008080;"> 1</span> <span style="color: #0000ff;">private</span> Node enq(<span style="color: #0000ff;">final</span><span style="color: #000000;"> Node node) {
+</span><span style="color: #008080;"> 2</span>     <span style="color: #008000;">//</span><span style="color: #008000;">CAS"自旋"，直到成功加入队尾</span>
+<span style="color: #008080;"> 3</span>     <span style="color: #0000ff;">for</span><span style="color: #000000;"> (;;) {
+</span><span style="color: #008080;"> 4</span>         Node t =<span style="color: #000000;"> tail;
+</span><span style="color: #008080;"> 5</span>         <span style="color: #0000ff;">if</span> (t == <span style="color: #0000ff;">null</span>) { <span style="color: #008000;">//</span><span style="color: #008000;"> 队列为空，创建一个空的标志结点作为head结点，并将tail也指向它。</span>
+<span style="color: #008080;"> 6</span>             <span style="color: #0000ff;">if</span> (compareAndSetHead(<span style="color: #0000ff;">new</span><span style="color: #000000;"> Node()))
+</span><span style="color: #008080;"> 7</span>                 tail =<span style="color: #000000;"> head;
+</span><span style="color: #008080;"> 8</span>         } <span style="color: #0000ff;">else</span> {<span style="color: #008000;">//</span><span style="color: #008000;">正常流程，放入队尾</span>
+<span style="color: #008080;"> 9</span>             node.prev =<span style="color: #000000;"> t;
+</span><span style="color: #008080;">10</span>             <span style="color: #0000ff;">if</span><span style="color: #000000;"> (compareAndSetTail(t, node)) {
+</span><span style="color: #008080;">11</span>                 t.next =<span style="color: #000000;"> node;
+</span><span style="color: #008080;">12</span>                 <span style="color: #0000ff;">return</span><span style="color: #000000;"> t;
+</span><span style="color: #008080;">13</span> <span style="color: #000000;">            }
+</span><span style="color: #008080;">14</span> <span style="color: #000000;">        }
+</span><span style="color: #008080;">15</span> <span style="color: #000000;">    }
+</span><span style="color: #008080;">16</span> }</pre>
+            <div class="cnblogs_code_toolbar">   </div></div>
+        <p>&nbsp;</p>
+        <p>如果你看过AtomicInteger.getAndIncrement()函数源码，那么相信你一眼便看出这段代码的精华。<span style="color: #0000ff; background-color: #ffffff;"><strong>CAS自旋volatile变量</strong></span>，是一种很经典的用法。还不太了解的，自己去百度一下吧。</p>
+        <h3>3.1.3&nbsp;acquireQueued(Node, int)</h3>
+        <p>　　OK，通过tryAcquire()和addWaiter()，该线程获取资源失败，已经被放入等待队列尾部了。聪明的你立刻应该能想到该线程下一部该干什么了吧：<span style="color: #0000ff;"><strong>进入等待状态休息，直到其他线程彻底释放资源后唤醒自己，自己再拿到资源，然后就可以去干自己想干的事了</strong></span>。没错，就是这样！是不是跟医院排队拿号有点相似~~acquireQueued()就是干这件事：<strong><span style="color: #0000ff;">在等待队列中排队拿号（中间没其它事干可以休息），直到拿到号后再返回</span></strong>。这个函数非常关键，还是上源码吧：</p>
+        <div class="cnblogs_code"><div class="cnblogs_code_toolbar">   </div>
+            <pre><span style="color: #008080;"> 1</span> <span style="color: #0000ff;">final</span> <span style="color: #0000ff;">boolean</span> acquireQueued(<span style="color: #0000ff;">final</span> Node node, <span style="color: #0000ff;">int</span><span style="color: #000000;"> arg) {
+</span><span style="color: #008080;"> 2</span>     <span style="color: #0000ff;">boolean</span> failed = <span style="color: #0000ff;">true</span>;<span style="color: #008000;">//</span><span style="color: #008000;">标记是否成功拿到资源</span>
+<span style="color: #008080;"> 3</span>     <span style="color: #0000ff;">try</span><span style="color: #000000;"> {
+</span><span style="color: #008080;"> 4</span>         <span style="color: #0000ff;">boolean</span> interrupted = <span style="color: #0000ff;">false</span>;<span style="color: #008000;">//</span><span style="color: #008000;">标记等待过程中是否被中断过
+</span><span style="color: #008080;"> 5</span>
+<span style="color: #008080;"> 6</span>         <span style="color: #008000;">//</span><span style="color: #008000;">又是一个“自旋”！</span>
+<span style="color: #008080;"> 7</span>         <span style="color: #0000ff;">for</span><span style="color: #000000;"> (;;) {
+</span><span style="color: #008080;"> 8</span>             <span style="color: #0000ff;">final</span> Node p = node.predecessor();<span style="color: #008000;">//</span><span style="color: #008000;">拿到前驱
+</span><span style="color: #008080;"> 9</span>             <span style="color: #008000;">//</span><span style="color: #008000;">如果前驱是head，即该结点已成老二，那么便有资格去尝试获取资源（可能是老大释放完资源唤醒自己的，当然也可能被interrupt了）。</span>
+<span style="color: #008080;">10</span>             <span style="color: #0000ff;">if</span> (p == head &amp;&amp;<span style="color: #000000;"> tryAcquire(arg)) {
+</span><span style="color: #008080;">11</span>                 setHead(node);<span style="color: #008000;">//</span><span style="color: #008000;">拿到资源后，将head指向该结点。所以head所指的标杆结点，就是当前获取到资源的那个结点或null。</span>
+<span style="color: #008080;">12</span>                 p.next = <span style="color: #0000ff;">null</span>; <span style="color: #008000;">//</span><span style="color: #008000;"> setHead中node.prev已置为null，此处再将head.next置为null，就是为了方便GC回收以前的head结点。也就意味着之前拿完资源的结点出队了！</span>
+<span style="color: #008080;">13</span>                 failed = <span style="color: #0000ff;">false</span><span style="color: #000000;">;
+</span><span style="color: #008080;">14</span>                 <span style="color: #0000ff;">return</span> interrupted;<span style="color: #008000;">//</span><span style="color: #008000;">返回等待过程中是否被中断过</span>
+<span style="color: #008080;">15</span> <span style="color: #000000;">            }
+</span><span style="color: #008080;">16</span>
+<span style="color: #008080;">17</span>             <span style="color: #008000;">//</span><span style="color: #008000;">如果自己可以休息了，就进入waiting状态，直到被unpark()</span>
+<span style="color: #008080;">18</span>             <span style="color: #0000ff;">if</span> (shouldParkAfterFailedAcquire(p, node) &amp;&amp;
+<span style="color: #008080;">19</span> <span style="color: #000000;">                parkAndCheckInterrupt())
+</span><span style="color: #008080;">20</span>                 interrupted = <span style="color: #0000ff;">true</span>;<span style="color: #008000;">//</span><span style="color: #008000;">如果等待过程中被中断过，哪怕只有那么一次，就将interrupted标记为true</span>
+<span style="color: #008080;">21</span> <span style="color: #000000;">        }
+</span><span style="color: #008080;">22</span>     } <span style="color: #0000ff;">finally</span><span style="color: #000000;"> {
+</span><span style="color: #008080;">23</span>         <span style="color: #0000ff;">if</span><span style="color: #000000;"> (failed)
+</span><span style="color: #008080;">24</span> <span style="color: #000000;">            cancelAcquire(node);
+</span><span style="color: #008080;">25</span> <span style="color: #000000;">    }
+</span><span style="color: #008080;">26</span> }</pre>
+            <div class="cnblogs_code_toolbar">   </div></div>
+        <p>&nbsp;</p>
+        <p>到这里了，我们先不急着总结acquireQueued()的函数流程，先看看shouldParkAfterFailedAcquire()和parkAndCheckInterrupt()具体干些什么。</p>
+        <h4>3.1.3.1 shouldParkAfterFailedAcquire(Node, Node)</h4>
+        <p>　　此方法主要用于检查状态，看看自己是否真的可以去休息了（进入waiting状态，如果线程状态转换不熟，可以参考本人上一篇写的<span style="color: #0000ff;"><a id="cb_post_title_url" class="postTitle2" href="http://www.cnblogs.com/waterystone/p/4920007.html" target="_blank"><span style="color: #0000ff;">Thread详解</span></a></span>），万一队列前边的线程都放弃了只是瞎站着，那也说不定，对吧！</p>
+        <div class="cnblogs_code"><div class="cnblogs_code_toolbar">   </div>
+            <pre><span style="color: #008080;"> 1</span> <span style="color: #0000ff;">private</span> <span style="color: #0000ff;">static</span> <span style="color: #0000ff;">boolean</span><span style="color: #000000;"> shouldParkAfterFailedAcquire(Node pred, Node node) {
+</span><span style="color: #008080;"> 2</span>     <span style="color: #0000ff;">int</span> ws = pred.waitStatus;<span style="color: #008000;">//</span><span style="color: #008000;">拿到前驱的状态</span>
+<span style="color: #008080;"> 3</span>     <span style="color: #0000ff;">if</span> (ws ==<span style="color: #000000;"> Node.SIGNAL)
+</span><span style="color: #008080;"> 4</span>         <span style="color: #008000;">//</span><span style="color: #008000;">如果已经告诉前驱拿完号后通知自己一下，那就可以安心休息了</span>
+<span style="color: #008080;"> 5</span>         <span style="color: #0000ff;">return</span> <span style="color: #0000ff;">true</span><span style="color: #000000;">;
+</span><span style="color: #008080;"> 6</span>     <span style="color: #0000ff;">if</span> (ws &gt; 0<span style="color: #000000;">) {
+</span><span style="color: #008080;"> 7</span>         <span style="color: #008000;">/*</span>
+<span style="color: #008080;"> 8</span> <span style="color: #008000;">         * 如果前驱放弃了，那就一直往前找，直到找到最近一个正常等待的状态，并排在它的后边。
+</span><span style="color: #008080;"> 9</span> <span style="color: #008000;">         * 注意：那些放弃的结点，由于被自己“加塞”到它们前边，它们相当于形成一个无引用链，稍后就会被保安大叔赶走了(GC回收)！
+</span><span style="color: #008080;">10</span>          <span style="color: #008000;">*/</span>
+<span style="color: #008080;">11</span>         <span style="color: #0000ff;">do</span><span style="color: #000000;"> {
+</span><span style="color: #008080;">12</span>             node.prev = pred =<span style="color: #000000;"> pred.prev;
+</span><span style="color: #008080;">13</span>         } <span style="color: #0000ff;">while</span> (pred.waitStatus &gt; 0<span style="color: #000000;">);
+</span><span style="color: #008080;">14</span>         pred.next =<span style="color: #000000;"> node;
+</span><span style="color: #008080;">15</span>     } <span style="color: #0000ff;">else</span><span style="color: #000000;"> {
+</span><span style="color: #008080;">16</span>          <span style="color: #008000;">//</span><span style="color: #008000;">如果前驱正常，那就把前驱的状态设置成SIGNAL，告诉它拿完号后通知自己一下。有可能失败，人家说不定刚刚释放完呢！</span>
+<span style="color: #008080;">17</span> <span style="color: #000000;">        compareAndSetWaitStatus(pred, ws, Node.SIGNAL);
+</span><span style="color: #008080;">18</span> <span style="color: #000000;">    }
+</span><span style="color: #008080;">19</span>     <span style="color: #0000ff;">return</span> <span style="color: #0000ff;">false</span><span style="color: #000000;">;
+</span><span style="color: #008080;">20</span> }</pre>
+            <div class="cnblogs_code_toolbar">   </div></div>
+        <p>&nbsp;</p>
+        <p>整个流程中，如果前驱结点的状态不是SIGNAL，那么自己就不能安心去休息，需要去找个安心的休息点，同时可以再尝试下看有没有机会轮到自己拿号。</p>
+        <h4>3.1.3.2 parkAndCheckInterrupt()</h4>
+        <p>　　如果线程找好安全休息点后，那就可以安心去休息了。此方法就是让线程去休息，真正进入等待状态。</p>
+        <div class="cnblogs_code">
+<pre><span style="color: #008080;">1</span> <span style="color: #0000ff;">private</span> <span style="color: #0000ff;">final</span> <span style="color: #0000ff;">boolean</span><span style="color: #000000;"> parkAndCheckInterrupt() {
+</span><span style="color: #008080;">2</span>     LockSupport.park(<span style="color: #0000ff;">this</span>);<span style="color: #008000;">//</span><span style="color: #008000;">调用park()使线程进入waiting状态</span>
+<span style="color: #008080;">3</span>     <span style="color: #0000ff;">return</span> Thread.interrupted();<span style="color: #008000;">//</span><span style="color: #008000;">如果被唤醒，查看自己是不是被中断的。</span>
+<span style="color: #008080;">4</span> }</pre>
+        </div>
+        <p>&nbsp;　　park()会让当前线程进入waiting状态。在此状态下，有两种途径可以唤醒该线程：1）被unpark()；2）被interrupt()。（再说一句，如果线程状态转换不熟，可以参考本人写的<span style="color: #0000ff;"><a id="cb_post_title_url" class="postTitle2" href="http://www.cnblogs.com/waterystone/p/4920007.html" target="_blank"><span style="color: #0000ff;">Thread详解</span></a></span>）。需要注意的是，Thread.interrupted()会清除当前线程的中断标记位。&nbsp;</p>
+        <h4>3.1.3.3 小结</h4>
+        <p>　　OK，看了shouldParkAfterFailedAcquire()和parkAndCheckInterrupt()，现在让我们再回到acquireQueued()，总结下该函数的具体流程：</p>
+        <ol>
+            <li>结点进入队尾后，检查状态，找到安全休息点；</li>
+            <li>调用park()进入waiting状态，等待unpark()或interrupt()唤醒自己；</li>
+            <li>被唤醒后，看自己是不是有资格能拿到号。如果拿到，head指向当前结点，并返回从入队到拿到号的整个过程中是否被中断过；如果没拿到，继续流程1。</li>
+        </ol>
+        <p>&nbsp;</p>
+        <h3>3.1.4 小结</h3>
+        <p>　　OKOK，acquireQueued()分析完之后，我们接下来再回到acquire()！再贴上它的源码吧：</p>
+        <div class="cnblogs_code">
+<pre><span style="color: #008080;">1</span> <span style="color: #0000ff;">public</span> <span style="color: #0000ff;">final</span> <span style="color: #0000ff;">void</span> acquire(<span style="color: #0000ff;">int</span><span style="color: #000000;"> arg) {
+</span><span style="color: #008080;">2</span>     <span style="color: #0000ff;">if</span> (!tryAcquire(arg) &amp;&amp;
+<span style="color: #008080;">3</span> <span style="color: #000000;">        acquireQueued(addWaiter(Node.EXCLUSIVE), arg))
+</span><span style="color: #008080;">4</span> <span style="color: #000000;">        selfInterrupt();
+</span><span style="color: #008080;">5</span> }</pre>
+        </div>
+        <p>再来总结下它的流程吧：</p>
+        <ol>
+            <li>调用自定义同步器的tryAcquire()尝试直接去获取资源，如果成功则直接返回；</li>
+            <li>没成功，则addWaiter()将该线程加入等待队列的尾部，并标记为独占模式；</li>
+            <li>acquireQueued()使线程在等待队列中休息，有机会时（轮到自己，会被unpark()）会去尝试获取资源。获取到资源后才返回。如果在整个等待过程中被中断过，则返回true，否则返回false。</li>
+            <li>如果线程在等待过程中被中断过，它是不响应的。只是获取资源后才再进行自我中断selfInterrupt()，将中断补上。</li>
+        </ol>
+        <p>由于此函数是重中之重，我再用流程图总结一下：</p>
+        <p><img src="https://images2015.cnblogs.com/blog/721070/201511/721070-20151102145743461-623794326.png" alt=""></p>
+        <p>至此，acquire()的流程终于算是告一段落了。这也就是ReentrantLock.lock()的流程，不信你去看其lock()源码吧，整个函数就是一条acquire(1)！！！</p>
+        <p>&nbsp;</p>
+        <h2>3.2 release(int)</h2>
+        <p>&nbsp;　　上一小节已经把acquire()说完了，这一小节就来讲讲它的反操作release()吧。此方法是独占模式下线程释放共享资源的顶层入口。它会释放指定量的资源，如果彻底释放了（即state=0）,它会唤醒等待队列里的其他线程来获取资源。这也正是unlock()的语义，当然不仅仅只限于unlock()。下面是release()的源码：</p>
+        <div class="cnblogs_code"><div class="cnblogs_code_toolbar">   </div>
+            <pre><span style="color: #008080;">1</span> <span style="color: #0000ff;">public</span> <span style="color: #0000ff;">final</span> <span style="color: #0000ff;">boolean</span> release(<span style="color: #0000ff;">int</span><span style="color: #000000;"> arg) {
+</span><span style="color: #008080;">2</span>     <span style="color: #0000ff;">if</span><span style="color: #000000;"> (tryRelease(arg)) {
+</span><span style="color: #008080;">3</span>         Node h = head;<span style="color: #008000;">//</span><span style="color: #008000;">找到头结点</span>
+<span style="color: #008080;">4</span>         <span style="color: #0000ff;">if</span> (h != <span style="color: #0000ff;">null</span> &amp;&amp; h.waitStatus != 0<span style="color: #000000;">)
+</span><span style="color: #008080;">5</span>             unparkSuccessor(h);<span style="color: #008000;">//</span><span style="color: #008000;">唤醒等待队列里的下一个线程</span>
+<span style="color: #008080;">6</span>         <span style="color: #0000ff;">return</span> <span style="color: #0000ff;">true</span><span style="color: #000000;">;
+</span><span style="color: #008080;">7</span> <span style="color: #000000;">    }
+</span><span style="color: #008080;">8</span>     <span style="color: #0000ff;">return</span> <span style="color: #0000ff;">false</span><span style="color: #000000;">;
+</span><span style="color: #008080;">9</span> }</pre>
+            <div class="cnblogs_code_toolbar">   </div></div>
+        <p>&nbsp;</p>
+        <p>　　逻辑并不复杂。它调用tryRelease()来释放资源。有一点需要注意的是，<span style="color: #0000ff;"><strong>它是根据tryRelease()的返回值来判断该线程是否已经完成释放掉资源了！所以自定义同步器在设计tryRelease()的时候要明确这一点！！</strong></span></p>
+        <h3>3.2.1 tryRelease(int)</h3>
+        <p>　　此方法尝试去释放指定量的资源。下面是tryRelease()的源码：</p>
+        <div class="cnblogs_code">
+<pre><span style="color: #008080;">1</span> <span style="color: #0000ff;">protected</span> <span style="color: #0000ff;">boolean</span> tryRelease(<span style="color: #0000ff;">int</span><span style="color: #000000;"> arg) {
+</span><span style="color: #008080;">2</span>     <span style="color: #0000ff;">throw</span> <span style="color: #0000ff;">new</span><span style="color: #000000;"> UnsupportedOperationException();
+</span><span style="color: #008080;">3</span> }</pre>
+        </div>
+        <p>&nbsp;</p>
+        <p>　　跟tryAcquire()一样，这个方法是需要独占模式的自定义同步器去实现的。正常来说，tryRelease()都会成功的，因为这是独占模式，该线程来释放资源，那么它肯定已经拿到独占资源了，直接减掉相应量的资源即可(state-=arg)，也不需要考虑线程安全的问题。但要注意它的返回值，上面已经提到了，<strong><span style="color: #0000ff;">release()是根据tryRelease()的返回值来判断该线程是否已经完成释放掉资源了！</span></strong>所以自义定同步器在实现时，如果已经彻底释放资源(state=0)，要返回true，否则返回false。</p>
+        <h3>3.2.2 unparkSuccessor(Node)</h3>
+        <p>　　此方法用于唤醒等待队列中下一个线程。下面是源码：</p>
+        <div class="cnblogs_code"><div class="cnblogs_code_toolbar">   </div>
+            <pre><span style="color: #008080;"> 1</span> <span style="color: #0000ff;">private</span> <span style="color: #0000ff;">void</span><span style="color: #000000;"> unparkSuccessor(Node node) {
+</span><span style="color: #008080;"> 2</span>     <span style="color: #008000;">//</span><span style="color: #008000;">这里，node一般为当前线程所在的结点。</span>
+<span style="color: #008080;"> 3</span>     <span style="color: #0000ff;">int</span> ws =<span style="color: #000000;"> node.waitStatus;
+</span><span style="color: #008080;"> 4</span>     <span style="color: #0000ff;">if</span> (ws &lt; 0)<span style="color: #008000;">//</span><span style="color: #008000;">置零当前线程所在的结点状态，允许失败。</span>
+<span style="color: #008080;"> 5</span>         compareAndSetWaitStatus(node, ws, 0<span style="color: #000000;">);
+</span><span style="color: #008080;"> 6</span>
+<span style="color: #008080;"> 7</span>     Node s = node.next;<span style="color: #008000;">//</span><span style="color: #008000;">找到下一个需要唤醒的结点s</span>
+<span style="color: #008080;"> 8</span>     <span style="color: #0000ff;">if</span> (s == <span style="color: #0000ff;">null</span> || s.waitStatus &gt; 0) {<span style="color: #008000;">//</span><span style="color: #008000;">如果为空或已取消</span>
+<span style="color: #008080;"> 9</span>         s = <span style="color: #0000ff;">null</span><span style="color: #000000;">;
+</span><span style="color: #008080;">10</span>         <span style="color: #0000ff;">for</span> (Node t = tail; t != <span style="color: #0000ff;">null</span> &amp;&amp; t != node; t =<span style="color: #000000;"> t.prev)
+</span><span style="color: #008080;">11</span>             <span style="color: #0000ff;">if</span> (t.waitStatus &lt;= 0)<span style="color: #008000;">//</span><span style="color: #008000;">从这里可以看出，&lt;=0的结点，都是还有效的结点。</span>
+<span style="color: #008080;">12</span>                 s =<span style="color: #000000;"> t;
+</span><span style="color: #008080;">13</span> <span style="color: #000000;">    }
+</span><span style="color: #008080;">14</span>     <span style="color: #0000ff;">if</span> (s != <span style="color: #0000ff;">null</span><span style="color: #000000;">)
+</span><span style="color: #008080;">15</span>         LockSupport.unpark(s.thread);<span style="color: #008000;">//</span><span style="color: #008000;">唤醒</span>
+<span style="color: #008080;">16</span> }</pre>
+            <div class="cnblogs_code_toolbar">   </div></div>
+        <p>&nbsp;</p>
+        <p>　　这个函数并不复杂。一句话概括：<strong><span style="color: #0000ff;">用unpark()唤醒等待队列中最前边的那个未放弃线程</span></strong>，这里我们也用s来表示吧。此时，再和acquireQueued()联系起来，s被唤醒后，进入if (p == head &amp;&amp; tryAcquire(arg))的判断（即使p!=head也没关系，它会再进入shouldParkAfterFailedAcquire()寻找一个安全点。这里既然s已经是等待队列中最前边的那个未放弃线程了，那么通过shouldParkAfterFailedAcquire()的调整，s也必然会跑到head的next结点，下一次自旋p==head就成立啦），然后s把自己设置成head标杆结点，表示自己已经获取到资源了，acquire()也返回了！！And then, DO what you WANT!</p>
+        <h3>3.2.3 小结</h3>
+        <p>　　release()是独占模式下线程释放共享资源的顶层入口。它会释放指定量的资源，如果彻底释放了（即state=0）,它会唤醒等待队列里的其他线程来获取资源。</p>
+        <h2>3.3 acquireShared(int)</h2>
+        <p>　　此方法是共享模式下线程获取共享资源的顶层入口。它会获取指定量的资源，获取成功则直接返回，获取失败则进入等待队列，直到获取到资源为止，整个过程忽略中断。下面是acquireShared()的源码：</p>
+        <div class="cnblogs_code">
+<pre><span style="color: #008080;">1</span> <span style="color: #0000ff;">public</span> <span style="color: #0000ff;">final</span> <span style="color: #0000ff;">void</span> acquireShared(<span style="color: #0000ff;">int</span><span style="color: #000000;"> arg) {
+</span><span style="color: #008080;">2</span>     <span style="color: #0000ff;">if</span> (tryAcquireShared(arg) &lt; 0<span style="color: #000000;">)
+</span><span style="color: #008080;">3</span> <span style="color: #000000;">        doAcquireShared(arg);
+</span><span style="color: #008080;">4</span> }</pre>
+        </div>
+        <p>&nbsp;</p>
+        <p>　　这里tryAcquireShared()依然需要自定义同步器去实现。但是AQS已经把其返回值的语义定义好了：负值代表获取失败；0代表获取成功，但没有剩余资源；正数表示获取成功，还有剩余资源，其他线程还可以去获取。所以这里acquireShared()的流程就是：</p>
+        <ol>
+            <li style="list-style-type: none;"><ol>
+                <li>tryAcquireShared()尝试获取资源，成功则直接返回；</li>
+                <li>失败则通过doAcquireShared()进入等待队列，直到获取到资源为止才返回。</li>
+            </ol></li>
+        </ol>
+        <h3>3.3.1 doAcquireShared(int)</h3>
+        <p>　　此方法用于将当前线程加入等待队列尾部休息，直到其他线程释放资源唤醒自己，自己成功拿到相应量的资源后才返回。下面是doAcquireShared()的源码：</p>
+        <div class="cnblogs_code"><div class="cnblogs_code_toolbar">   </div>
+            <pre><span style="color: #008080;"> 1</span> <span style="color: #0000ff;">private</span> <span style="color: #0000ff;">void</span> doAcquireShared(<span style="color: #0000ff;">int</span><span style="color: #000000;"> arg) {
+</span><span style="color: #008080;"> 2</span>     <span style="color: #0000ff;">final</span> Node node = addWaiter(Node.SHARED);<span style="color: #008000;">//</span><span style="color: #008000;">加入队列尾部</span>
+<span style="color: #008080;"> 3</span>     <span style="color: #0000ff;">boolean</span> failed = <span style="color: #0000ff;">true</span>;<span style="color: #008000;">//</span><span style="color: #008000;">是否成功标志</span>
+<span style="color: #008080;"> 4</span>     <span style="color: #0000ff;">try</span><span style="color: #000000;"> {
+</span><span style="color: #008080;"> 5</span>         <span style="color: #0000ff;">boolean</span> interrupted = <span style="color: #0000ff;">false</span>;<span style="color: #008000;">//</span><span style="color: #008000;">等待过程中是否被中断过的标志</span>
+<span style="color: #008080;"> 6</span>         <span style="color: #0000ff;">for</span><span style="color: #000000;"> (;;) {
+</span><span style="color: #008080;"> 7</span>             <span style="color: #0000ff;">final</span> Node p = node.predecessor();<span style="color: #008000;">//</span><span style="color: #008000;">前驱</span>
+<span style="color: #008080;"> 8</span>             <span style="color: #0000ff;">if</span> (p == head) {<span style="color: #008000;">//</span><span style="color: #008000;">如果到head的下一个，因为head是拿到资源的线程，此时node被唤醒，很可能是head用完资源来唤醒自己的</span>
+<span style="color: #008080;"> 9</span>                 <span style="color: #0000ff;">int</span> r = tryAcquireShared(arg);<span style="color: #008000;">//</span><span style="color: #008000;">尝试获取资源</span>
+<span style="color: #008080;">10</span>                 <span style="color: #0000ff;">if</span> (r &gt;= 0) {<span style="color: #008000;">//</span><span style="color: #008000;">成功</span>
+<span style="color: #008080;">11</span>                     setHeadAndPropagate(node, r);<span style="color: #008000;">//</span><span style="color: #008000;">将head指向自己，还有剩余资源可以再唤醒之后的线程</span>
+<span style="color: #008080;">12</span>                     p.next = <span style="color: #0000ff;">null</span>; <span style="color: #008000;">//</span><span style="color: #008000;"> help GC</span>
+<span style="color: #008080;">13</span>                     <span style="color: #0000ff;">if</span> (interrupted)<span style="color: #008000;">//</span><span style="color: #008000;">如果等待过程中被打断过，此时将中断补上。</span>
+<span style="color: #008080;">14</span> <span style="color: #000000;">                        selfInterrupt();
+</span><span style="color: #008080;">15</span>                     failed = <span style="color: #0000ff;">false</span><span style="color: #000000;">;
+</span><span style="color: #008080;">16</span>                     <span style="color: #0000ff;">return</span><span style="color: #000000;">;
+</span><span style="color: #008080;">17</span> <span style="color: #000000;">                }
+</span><span style="color: #008080;">18</span> <span style="color: #000000;">            }
+</span><span style="color: #008080;">19</span>
+<span style="color: #008080;">20</span>             <span style="color: #008000;">//</span><span style="color: #008000;">判断状态，寻找安全点，进入waiting状态，等着被unpark()或interrupt()</span>
+<span style="color: #008080;">21</span>             <span style="color: #0000ff;">if</span> (shouldParkAfterFailedAcquire(p, node) &amp;&amp;
+<span style="color: #008080;">22</span> <span style="color: #000000;">                parkAndCheckInterrupt())
+</span><span style="color: #008080;">23</span>                 interrupted = <span style="color: #0000ff;">true</span><span style="color: #000000;">;
+</span><span style="color: #008080;">24</span> <span style="color: #000000;">        }
+</span><span style="color: #008080;">25</span>     } <span style="color: #0000ff;">finally</span><span style="color: #000000;"> {
+</span><span style="color: #008080;">26</span>         <span style="color: #0000ff;">if</span><span style="color: #000000;"> (failed)
+</span><span style="color: #008080;">27</span> <span style="color: #000000;">            cancelAcquire(node);
+</span><span style="color: #008080;">28</span> <span style="color: #000000;">    }
+</span><span style="color: #008080;">29</span> }</pre>
+            <div class="cnblogs_code_toolbar">   </div></div>
+        <p>&nbsp;</p>
+        <p>　　有木有觉得跟acquireQueued()很相似？对，其实流程并没有太大区别。只不过这里将补中断的selfInterrupt()放到doAcquireShared()里了，而独占模式是放到acquireQueued()之外，其实都一样，不知道Doug Lea是怎么想的。</p>
+        <p>　　跟独占模式比，还有一点需要注意的是，这里只有线程是head.next时（“老二”），才会去尝试获取资源，有剩余的话还会唤醒之后的队友。那么问题就来了，假如老大用完后释放了5个资源，而老二需要6个，老三需要1个，老四需要2个。老大先唤醒老二，老二一看资源不够，他是把资源让给老三呢，还是不让？答案是否定的！老二会继续park()等待其他线程释放资源，也更不会去唤醒老三和老四了。独占模式，同一时刻只有一个线程去执行，这样做未尝不可；但共享模式下，多个线程是可以同时执行的，现在因为老二的资源需求量大，而把后面量小的老三和老四也都卡住了。当然，这并不是问题，只是AQS保证严格按照入队顺序唤醒罢了（保证公平，但降低了并发）。</p>
+        <p>&nbsp;</p>
+        <h4>3.3.1.1 setHeadAndPropagate(Node, int)</h4>
+        <div class="cnblogs_code"><div class="cnblogs_code_toolbar">   </div>
+            <pre><span style="color: #008080;"> 1</span> <span style="color: #0000ff;">private</span> <span style="color: #0000ff;">void</span> setHeadAndPropagate(Node node, <span style="color: #0000ff;">int</span><span style="color: #000000;"> propagate) {
+</span><span style="color: #008080;"> 2</span>     Node h =<span style="color: #000000;"> head;
+</span><span style="color: #008080;"> 3</span>     setHead(node);<span style="color: #008000;">//</span><span style="color: #008000;">head指向自己
+</span><span style="color: #008080;"> 4</span>      <span style="color: #008000;">//</span><span style="color: #008000;">如果还有剩余量，继续唤醒下一个邻居线程</span>
+<span style="color: #008080;"> 5</span>     <span style="color: #0000ff;">if</span> (propagate &gt; 0 || h == <span style="color: #0000ff;">null</span> || h.waitStatus &lt; 0<span style="color: #000000;">) {
+</span><span style="color: #008080;"> 6</span>         Node s =<span style="color: #000000;"> node.next;
+</span><span style="color: #008080;"> 7</span>         <span style="color: #0000ff;">if</span> (s == <span style="color: #0000ff;">null</span> ||<span style="color: #000000;"> s.isShared())
+</span><span style="color: #008080;"> 8</span> <span style="color: #000000;">            doReleaseShared();
+</span><span style="color: #008080;"> 9</span> <span style="color: #000000;">    }
+</span><span style="color: #008080;">10</span> }</pre>
+            <div class="cnblogs_code_toolbar">   </div></div>
+        <p>&nbsp;</p>
+        <p>　　此方法在setHead()的基础上多了一步，就是自己苏醒的同时，如果条件符合（比如还有剩余资源），还会去唤醒后继结点，毕竟是共享模式！</p>
+        <p>　　doReleaseShared()我们留着下一小节的releaseShared()里来讲。</p>
+        <p>&nbsp;</p>
+        <h3>3.3.2 小结</h3>
+        <p>　　OK，至此，acquireShared()也要告一段落了。让我们再梳理一下它的流程：</p>
+        <ol>
+            <li style="list-style-type: none;"></li>
+            <ol>
+                <li>tryAcquireShared()尝试获取资源，成功则直接返回；</li>
+                <li>失败则通过doAcquireShared()进入等待队列park()，直到被unpark()/interrupt()并成功获取到资源才返回。整个等待过程也是忽略中断的。</li>
+            </ol></ol>
+        <p>　　其实跟acquire()的流程大同小异，只不过多了个<span style="color: #0000ff;"><strong>自己拿到资源后，还会去唤醒后继队友的操作（这才是共享嘛）</strong></span>。</p>
+        <h2>3.4&nbsp;releaseShared()</h2>
+        <p>　　上一小节已经把acquireShared()说完了，这一小节就来讲讲它的反操作releaseShared()吧。此方法是共享模式下线程释放共享资源的顶层入口。它会释放指定量的资源，如果成功释放且允许唤醒等待线程，它会唤醒等待队列里的其他线程来获取资源。下面是releaseShared()的源码：</p>
+        <div class="cnblogs_code"><div class="cnblogs_code_toolbar">   </div>
+            <pre><span style="color: #008080;">1</span> <span style="color: #0000ff;">public</span> <span style="color: #0000ff;">final</span> <span style="color: #0000ff;">boolean</span> releaseShared(<span style="color: #0000ff;">int</span><span style="color: #000000;"> arg) {
+</span><span style="color: #008080;">2</span>     <span style="color: #0000ff;">if</span> (tryReleaseShared(arg)) {<span style="color: #008000;">//</span><span style="color: #008000;">尝试释放资源</span>
+<span style="color: #008080;">3</span>         doReleaseShared();<span style="color: #008000;">//</span><span style="color: #008000;">唤醒后继结点</span>
+<span style="color: #008080;">4</span>         <span style="color: #0000ff;">return</span> <span style="color: #0000ff;">true</span><span style="color: #000000;">;
+</span><span style="color: #008080;">5</span> <span style="color: #000000;">    }
+</span><span style="color: #008080;">6</span>     <span style="color: #0000ff;">return</span> <span style="color: #0000ff;">false</span><span style="color: #000000;">;
+</span><span style="color: #008080;">7</span> }</pre>
+            <div class="cnblogs_code_toolbar">   </div></div>
+        <p>&nbsp;</p>
+        <p>　　此方法的流程也比较简单，一句话：<span style="color: #0000ff;">释放掉资源后，唤醒后继</span>。跟独占模式下的release()相似，但有一点稍微需要注意：独占模式下的tryRelease()在完全释放掉资源（state=0）后，才会返回true去唤醒其他线程，这主要是基于独占下可重入的考量；而共享模式下的releaseShared()则没有这种要求，共享模式实质就是控制一定量的线程并发执行，那么拥有资源的线程在释放掉部分资源时就可以唤醒后继等待结点。例如，资源总量是13，A（5）和B（7）分别获取到资源并发运行，C（4）来时只剩1个资源就需要等待。A在运行过程中释放掉2个资源量，然后tryReleaseShared(2)返回true唤醒C，C一看只有3个仍不够继续等待；随后B又释放2个，tryReleaseShared(2)返回true唤醒C，C一看有5个够自己用了，然后C就可以跟A和B一起运行。而ReentrantReadWriteLock读锁的tryReleaseShared()只有在完全释放掉资源（state=0）才返回true，所以自定义同步器可以根据需要决定tryReleaseShared()的返回值。</p>
+        <h3>3.4.1&nbsp;doReleaseShared()</h3>
+        <p>　　此方法主要用于唤醒后继。下面是它的源码：</p>
+        <div class="cnblogs_code"><div class="cnblogs_code_toolbar">   </div>
+            <pre><span style="color: #008080;"> 1</span> <span style="color: #0000ff;">private</span> <span style="color: #0000ff;">void</span><span style="color: #000000;"> doReleaseShared() {
+</span><span style="color: #008080;"> 2</span>     <span style="color: #0000ff;">for</span><span style="color: #000000;"> (;;) {
+</span><span style="color: #008080;"> 3</span>         Node h =<span style="color: #000000;"> head;
+</span><span style="color: #008080;"> 4</span>         <span style="color: #0000ff;">if</span> (h != <span style="color: #0000ff;">null</span> &amp;&amp; h !=<span style="color: #000000;"> tail) {
+</span><span style="color: #008080;"> 5</span>             <span style="color: #0000ff;">int</span> ws =<span style="color: #000000;"> h.waitStatus;
+</span><span style="color: #008080;"> 6</span>             <span style="color: #0000ff;">if</span> (ws ==<span style="color: #000000;"> Node.SIGNAL) {
+</span><span style="color: #008080;"> 7</span>                 <span style="color: #0000ff;">if</span> (!compareAndSetWaitStatus(h, Node.SIGNAL, 0<span style="color: #000000;">))
+</span><span style="color: #008080;"> 8</span>                     <span style="color: #0000ff;">continue</span><span style="color: #000000;">;
+</span><span style="color: #008080;"> 9</span>                 unparkSuccessor(h);<span style="color: #008000;">//</span><span style="color: #008000;">唤醒后继</span>
+<span style="color: #008080;">10</span> <span style="color: #000000;">            }
+</span><span style="color: #008080;">11</span>             <span style="color: #0000ff;">else</span> <span style="color: #0000ff;">if</span> (ws == 0 &amp;&amp;
+<span style="color: #008080;">12</span>                      !compareAndSetWaitStatus(h, 0<span style="color: #000000;">, Node.PROPAGATE))
+</span><span style="color: #008080;">13</span>                 <span style="color: #0000ff;">continue</span><span style="color: #000000;">;
+</span><span style="color: #008080;">14</span> <span style="color: #000000;">        }
+</span><span style="color: #008080;">15</span>         <span style="color: #0000ff;">if</span> (h == head)<span style="color: #008000;">//</span><span style="color: #008000;"> head发生变化</span>
+<span style="color: #008080;">16</span>             <span style="color: #0000ff;">break</span><span style="color: #000000;">;
+</span><span style="color: #008080;">17</span> <span style="color: #000000;">    }
+</span><span style="color: #008080;">18</span> }</pre>
+            <div class="cnblogs_code_toolbar">   </div></div>
+        <p>&nbsp;</p>
+        <p>&nbsp;</p>
+        <h2>3.5 小结</h2>
+        <p>　　本节我们详解了独占和共享两种模式下获取-释放资源(acquire-release、acquireShared-releaseShared)的源码，相信大家都有一定认识了。值得注意的是，acquire()和acquireShared()两种方法下，线程在等待队列中都是忽略中断的。AQS也支持响应中断的，acquireInterruptibly()/acquireSharedInterruptibly()即是，这里相应的源码跟acquire()和acquireShared()差不多，这里就不再详解了。</p>
+        <p>&nbsp;</p>
+        <h1>四、简单应用</h1>
+        <p>　　通过前边几个章节的学习，相信大家已经基本理解AQS的原理了。这里再将“框架”一节中的一段话复制过来：</p>
+        <p><span style="text-decoration: underline; color: #0000ff;">　　不同的自定义同步器争用共享资源的方式也不同。<strong>自定义同步器在实现时只需要实现共享资源state的获取与释放方式即可</strong>，至于具体线程等待队列的维护（如获取资源失败入队/唤醒出队等），AQS已经在顶层实现好了。自定义同步器实现时主要实现以下几种方法：</span></p>
+        <ul>
+            <li><span style="text-decoration: underline; color: #0000ff;">isHeldExclusively()：该线程是否正在独占资源。只有用到condition才需要去实现它。</span></li>
+            <li><span style="text-decoration: underline; color: #0000ff;">tryAcquire(int)：独占方式。尝试获取资源，成功则返回true，失败则返回false。</span></li>
+            <li><span style="text-decoration: underline; color: #0000ff;">tryRelease(int)：独占方式。尝试释放资源，成功则返回true，失败则返回false。</span></li>
+            <li><span style="text-decoration: underline; color: #0000ff;">tryAcquireShared(int)：共享方式。尝试获取资源。负数表示失败；0表示成功，但没有剩余可用资源；正数表示成功，且有剩余资源。</span></li>
+            <li><span style="text-decoration: underline; color: #0000ff;">tryReleaseShared(int)：共享方式。尝试释放资源，如果释放后允许唤醒后续等待结点返回true，否则返回false。</span></li>
+        </ul>
+        <p>　　OK，下面我们就以AQS源码里的Mutex为例，讲一下AQS的简单应用。</p>
+        <h2>4.1 Mutex（互斥锁）</h2>
+        <p>　　Mutex是一个不可重入的互斥锁实现。锁资源（AQS里的state）只有两种状态：0表示未锁定，1表示锁定。下边是Mutex的核心源码：</p>
+        <div class="cnblogs_code"><div class="cnblogs_code_toolbar">   </div>
+            <pre><span style="color: #008080;"> 1</span> <span style="color: #0000ff;">class</span> Mutex <span style="color: #0000ff;">implements</span><span style="color: #000000;"> Lock, java.io.Serializable {
+</span><span style="color: #008080;"> 2</span>     <span style="color: #008000;">//</span><span style="color: #008000;"> 自定义同步器</span>
+<span style="color: #008080;"> 3</span>     <span style="color: #0000ff;">private</span> <span style="color: #0000ff;">static</span> <span style="color: #0000ff;">class</span> Sync <span style="color: #0000ff;">extends</span><span style="color: #000000;"> AbstractQueuedSynchronizer {
+</span><span style="color: #008080;"> 4</span>         <span style="color: #008000;">//</span><span style="color: #008000;"> 判断是否锁定状态</span>
+<span style="color: #008080;"> 5</span>         <span style="color: #0000ff;">protected</span> <span style="color: #0000ff;">boolean</span><span style="color: #000000;"> isHeldExclusively() {
+</span><span style="color: #008080;"> 6</span>             <span style="color: #0000ff;">return</span> getState() == 1<span style="color: #000000;">;
+</span><span style="color: #008080;"> 7</span> <span style="color: #000000;">        }
+</span><span style="color: #008080;"> 8</span>
+<span style="color: #008080;"> 9</span>         <span style="color: #008000;">//</span><span style="color: #008000;"> 尝试获取资源，立即返回。成功则返回true，否则false。</span>
+<span style="color: #008080;">10</span>         <span style="color: #0000ff;">public</span> <span style="color: #0000ff;">boolean</span> tryAcquire(<span style="color: #0000ff;">int</span><span style="color: #000000;"> acquires) {
+</span><span style="color: #008080;">11</span>             <span style="color: #0000ff;">assert</span> acquires == 1; <span style="color: #008000;">//</span><span style="color: #008000;"> 这里限定只能为1个量</span>
+<span style="color: #008080;">12</span>             <span style="color: #0000ff;">if</span> (compareAndSetState(0, 1)) {<span style="color: #008000;">//</span><span style="color: #008000;">state为0才设置为1，不可重入！</span>
+<span style="color: #008080;">13</span>                 setExclusiveOwnerThread(Thread.currentThread());<span style="color: #008000;">//</span><span style="color: #008000;">设置为当前线程独占资源</span>
+<span style="color: #008080;">14</span>                 <span style="color: #0000ff;">return</span> <span style="color: #0000ff;">true</span><span style="color: #000000;">;
+</span><span style="color: #008080;">15</span> <span style="color: #000000;">            }
+</span><span style="color: #008080;">16</span>             <span style="color: #0000ff;">return</span> <span style="color: #0000ff;">false</span><span style="color: #000000;">;
+</span><span style="color: #008080;">17</span> <span style="color: #000000;">        }
+</span><span style="color: #008080;">18</span>
+<span style="color: #008080;">19</span>         <span style="color: #008000;">//</span><span style="color: #008000;"> 尝试释放资源，立即返回。成功则为true，否则false。</span>
+<span style="color: #008080;">20</span>         <span style="color: #0000ff;">protected</span> <span style="color: #0000ff;">boolean</span> tryRelease(<span style="color: #0000ff;">int</span><span style="color: #000000;"> releases) {
+</span><span style="color: #008080;">21</span>             <span style="color: #0000ff;">assert</span> releases == 1; <span style="color: #008000;">//</span><span style="color: #008000;"> 限定为1个量</span>
+<span style="color: #008080;">22</span>             <span style="color: #0000ff;">if</span> (getState() == 0)<span style="color: #008000;">//</span><span style="color: #008000;">既然来释放，那肯定就是已占有状态了。只是为了保险，多层判断！</span>
+<span style="color: #008080;">23</span>                 <span style="color: #0000ff;">throw</span> <span style="color: #0000ff;">new</span><span style="color: #000000;"> IllegalMonitorStateException();
+</span><span style="color: #008080;">24</span>             setExclusiveOwnerThread(<span style="color: #0000ff;">null</span><span style="color: #000000;">);
+</span><span style="color: #008080;">25</span>             setState(0);<span style="color: #008000;">//</span><span style="color: #008000;">释放资源，放弃占有状态</span>
+<span style="color: #008080;">26</span>             <span style="color: #0000ff;">return</span> <span style="color: #0000ff;">true</span><span style="color: #000000;">;
+</span><span style="color: #008080;">27</span> <span style="color: #000000;">        }
+</span><span style="color: #008080;">28</span> <span style="color: #000000;">    }
+</span><span style="color: #008080;">29</span>
+<span style="color: #008080;">30</span>     <span style="color: #008000;">//</span><span style="color: #008000;"> 真正同步类的实现都依赖继承于AQS的自定义同步器！</span>
+<span style="color: #008080;">31</span>     <span style="color: #0000ff;">private</span> <span style="color: #0000ff;">final</span> Sync sync = <span style="color: #0000ff;">new</span><span style="color: #000000;"> Sync();
+</span><span style="color: #008080;">32</span>
+<span style="color: #008080;">33</span>     <span style="color: #008000;">//</span><span style="color: #008000;">lock&lt;--&gt;acquire。两者语义一样：获取资源，即便等待，直到成功才返回。</span>
+<span style="color: #008080;">34</span>     <span style="color: #0000ff;">public</span> <span style="color: #0000ff;">void</span><span style="color: #000000;"> lock() {
+</span><span style="color: #008080;">35</span>         sync.acquire(1<span style="color: #000000;">);
+</span><span style="color: #008080;">36</span> <span style="color: #000000;">    }
+</span><span style="color: #008080;">37</span>
+<span style="color: #008080;">38</span>     <span style="color: #008000;">//</span><span style="color: #008000;">tryLock&lt;--&gt;tryAcquire。两者语义一样：尝试获取资源，要求立即返回。成功则为true，失败则为false。</span>
+<span style="color: #008080;">39</span>     <span style="color: #0000ff;">public</span> <span style="color: #0000ff;">boolean</span><span style="color: #000000;"> tryLock() {
+</span><span style="color: #008080;">40</span>         <span style="color: #0000ff;">return</span> sync.tryAcquire(1<span style="color: #000000;">);
+</span><span style="color: #008080;">41</span> <span style="color: #000000;">    }
+</span><span style="color: #008080;">42</span>
+<span style="color: #008080;">43</span>     <span style="color: #008000;">//</span><span style="color: #008000;">unlock&lt;--&gt;release。两者语文一样：释放资源。</span>
+<span style="color: #008080;">44</span>     <span style="color: #0000ff;">public</span> <span style="color: #0000ff;">void</span><span style="color: #000000;"> unlock() {
+</span><span style="color: #008080;">45</span>         sync.release(1<span style="color: #000000;">);
+</span><span style="color: #008080;">46</span> <span style="color: #000000;">    }
+</span><span style="color: #008080;">47</span>
+<span style="color: #008080;">48</span>     <span style="color: #008000;">//</span><span style="color: #008000;">锁是否占有状态</span>
+<span style="color: #008080;">49</span>     <span style="color: #0000ff;">public</span> <span style="color: #0000ff;">boolean</span><span style="color: #000000;"> isLocked() {
+</span><span style="color: #008080;">50</span>         <span style="color: #0000ff;">return</span><span style="color: #000000;"> sync.isHeldExclusively();
+</span><span style="color: #008080;">51</span> <span style="color: #000000;">    }
+</span><span style="color: #008080;">52</span> }</pre>
+            <div class="cnblogs_code_toolbar">   </div></div>
+        <p>&nbsp;</p>
+        <p>　　同步类在实现时一般都将自定义同步器（sync）定义为内部类，供自己使用；而同步类自己（Mutex）则实现某个接口，对外服务。当然，接口的实现要直接依赖sync，它们在语义上也存在某种对应关系！！而sync只用实现资源state的获取-释放方式tryAcquire-tryRelelase，至于线程的排队、等待、唤醒等，上层的AQS都已经实现好了，我们不用关心。</p>
+        <p>　　除了Mutex，ReentrantLock/CountDownLatch/Semphore这些同步类的实现方式都差不多，不同的地方就在获取-释放资源的方式tryAcquire-tryRelelase。掌握了这点，AQS的核心便被攻破了！</p>
+        <p>　　OK，至此，整个AQS的讲解也要落下帷幕了。希望本文能够对学习Java并发编程的同学有所借鉴，中间写的有不对的地方，也欢迎讨论和指正~</p></div>
+</div>
+<script async src="//dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js">
+</script>
+<span id="busuanzi_container_site_pv">
+    本站总访问量<span id="busuanzi_value_site_pv"></span>次
+</span>
+<span id="busuanzi_container_site_uv">
+  本站访客数<span id="busuanzi_value_site_uv"></span>人次
+</span>
+
+</body>
+</html>

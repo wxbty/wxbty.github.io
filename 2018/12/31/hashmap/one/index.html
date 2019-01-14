@@ -21,9 +21,9 @@
 <body>
 <div class="body_container">
     <div id="header">
-        <div class="site-name"><h1 class="hidden">hashmap解析</h1><a id="logo" href="/.">飞过海</a>
+        <div class="site-name"><h1 class="hidden">hashmap解析</h1><a id="logo" href="/">飞过海</a>
             <p class="description">回到梦开始的地方！</p></div>
-        <div id="nav-menu"><a href="/2018/08/01/start/one/" class="current"><i class="fa fa-home"> 首页</i></a><a
+        <div id="nav-menu"><a href="/2018/08/01/start/one" class="current"><i class="fa fa-home"> 首页</i></a><a
                 href="#"><i
                 class="fa fa-archive"> 归档</i></a><a href="/about/"><i class="fa fa-user"> 关于</i></a><a href="/atom.xml"><i
                 class="fa fa-rss"> 订阅</i></a></div>
@@ -67,7 +67,7 @@
 
                         <h3>2、hashmap的put及get原理</h3>
                         <ul>
-                            <li>大致实现</li>
+                            <li><strong>大致实现</strong></li>
                             <li>
                                 // 存储时:
                                 int hash = key.hashCode(); // 这个hashCode方法这里不详述,只要理解每个key的hash是一个固定的int值
@@ -82,7 +82,7 @@
 
                         </ul>
                         <ul>
-                            <li>put原理</li>
+                            <li><strong>put原理</strong></li>
                             <li>
                                 疑问：如果两个key通过hash%Entry[].length得到的index相同，会不会有覆盖的危险？
                                 　　这里HashMap里面用到链式数据结构的一个概念。上面我们提到过Entry类里面有一个
@@ -106,22 +106,27 @@
                             <li>结论：jdk1.8中是插入的是链表尾部</li>
 
                         </ul>
-                        <h3 id="项目结构"><a href="#项目结构" class="headerlink" title="项目结构"></a>项目结构</h3>
-                        <p><img src="https://wxbty.github.io/images/meepo/012.png" alt="结构图"></p>
                         <ul>
+                            <li><strong>get原理</strong></li>
+                            <li>
+                                get方法的实现相对简单，key(hashcode)-->hash-->indexFor-->最终索引位置，找到对应位置table[i]，再查看是否有链表，遍历链表，通过key的equals方法比对查找对应的记录
                             </li>
-                            <li><p><strong>meepo-core</strong> 该项目是JTA框架的核心实现，包括全局事务，XA资源，锁，事务镜像、定时清理等实现。</p>
-                            </li>
-                            <li><p><strong>meepo-supports</strong> 该项目是对核心组件的支持，包括jdbc、spring、切面的实现。</p>
-                            </li>
-                            <li><p><strong>meepo-supports-dubbo</strong>
-                                该项目是对dubbo框架的支持，里面主要针对dubbo的特性的实现,最主要对filter的spi扩展。
-                            </p>
-                            </li>
+                            <li>这里回顾下第一个问题，链表的元素是头插还是尾插？</li>
+                            <li>单链表next=null的节点是尾节点，另一头则是头节点，按刚才的分析，hashmap链表新增节点，应该是头插。但是刚才的分析基于1.6的代码，在JDk1.8中，则改成了尾插</li>
+                            <li>看一下1.6中addEntry的关键代码片段</li>
+                            <p><img src="https://wxbty.github.io/images/hashmap/02.png" alt="jdk1.6新增节点"></p>
+                            <li>Entry构造函数</li>
+                            <p><img src="https://wxbty.github.io/images/hashmap/03.png" alt="jdk1.6新增节点"></p>
+                            <li>从构造方法中的nexrt=n(n是已有节点)可以看出确实是把原本的链表直接链在了新建的Entry对象的后边，可以断定是插入头部。</li>
+                            <li>1.8的hashmap，entry改成了node节点,putVal的关键代码如下</li>
+                            <p><img src="https://wxbty.github.io/images/hashmap/04.png" alt="jdk1.6新增节点"></p>
+                            <li>显然地看出，当到达链表尾部（即p是链表的最后一个节点）时，会用newNode方法建立一个新的节点插入尾部</li>
+                            <li>结论：jdk1.8中是插入的是链表尾部</li>
+
                         </ul>
                     </div>
                     <div class="tags"></div>
-                    <div class="post-nav"><a href="/2018/08/01/start/two/" class="pre">meepo源码解析系列(二)之环境搭建</a></div>
+                    <div class="post-nav"><a href="/2018/12/31/hashmap/two" class="pre">hashmap解析(二)</a></div>
                 </div>
             </div>
         </div>
@@ -135,15 +140,15 @@
                 <div class="widget">
                     <div class="widget-title"><i class="fa fa-file-o"> 最近文章</i></div>
                     <ul class="post-list">
-                        <li class="post-list-item"><a class="post-list-link" href="/2018/08/01/start/two/">jdk源码(二)之hashmap</a>
+                        <li class="post-list-item"><a class="post-list-link" href="/2018/08/01/start/two">jdk源码(二)之hashmap</a>
                         </li>
-                        <li class="post-list-item"><a class="post-list-link" href="/2018/08/01/start/two/">jdk源码(三)之hashmap</a>
+                        <li class="post-list-item"><a class="post-list-link" href="/2018/08/01/start/two">jdk源码(三)之hashmap</a>
                         </li>
-                        <li class="post-list-item"><a class="post-list-link" href="/2018/08/01/start/two/">jdk源码(四)之hashmap</a>
+                        <li class="post-list-item"><a class="post-list-link" href="/2018/08/01/start/two">jdk源码(四)之hashmap</a>
                         </li>
-                        <li class="post-list-item"><a class="post-list-link" href="/2018/08/01/start/two/">jdk源码(五)之hashmap</a>
+                        <li class="post-list-item"><a class="post-list-link" href="/2018/08/01/start/two">jdk源码(五)之hashmap</a>
                         </li>
-                        <li class="post-list-item"><a class="post-list-link" href="/2018/08/01/start/two/">jdk源码(六)之hashmap</a>
+                        <li class="post-list-item"><a class="post-list-link" href="/2018/08/01/start/two">jdk源码(六)之hashmap</a>
                         </li>
                         <!--<li class="post-list-item"><a class="post-list-link" href="/2018/08/01/meepo/two/">meepo源码解析系列(二)之环境搭建</a>-->
                         <!--</li>-->
@@ -160,9 +165,9 @@
             </div>
         </div>
         <div class="pure-u-1 pure-u-md-3-4">
-            <div id="footer">Copyright © 2018 <a href="/." rel="nofollow">飞过海.</a> Powered by<a rel="nofollow"
-                                                                                                target="_blank"
-                                                                                                href="https://hexo.io">
+            <div id="footer">Copyright © 2018 <a href="/" rel="nofollow">飞过海.</a> Powered by<a rel="nofollow"
+                                                                                               target="_blank"
+                                                                                               href="https://hexo.io">
                 Hexo.</a><a rel="nofollow" target="_blank" href="https://github.com/tufu9441/maupassant-hexo"> Theme</a>
                 by<a rel="nofollow" target="_blank" href="https://github.com/pagecho"> Cho.</a></div>
         </div>
